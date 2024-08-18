@@ -1,5 +1,5 @@
 import React from "react";
-import { Game } from "./components/Game";
+import { Game } from "./components/game/Game";
 import { Scoreboard } from "./components/Scoreboard";
 import { ControlPanel } from "./components/ControlPanel";
 import { AppContainer } from "./components/AppContainer";
