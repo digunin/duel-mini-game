@@ -1,7 +1,17 @@
 import React from "react";
+import { Game } from "./components/Game";
+import { Scoreboard } from "./components/Scoreboard";
+import { ControlPanel } from "./components/ControlPanel";
+import { AppContainer } from "./components/AppContainer";
 
 function App() {
-  return <h1>Hello</h1>;
+  return (
+    <AppContainer>
+      <Scoreboard />
+      <Game />
+      <ControlPanel />
+    </AppContainer>
+  );
 }
 
 export default App;
