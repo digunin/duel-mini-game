@@ -1,14 +1,13 @@
 import React from "react";
-import { useAppContext } from "../../hooks/useAppContext";
+import { useGame } from "../../hooks/useGame";
+import { AppCanvas } from "../AppCanvas";
 
 export const Game = () => {
-  const {
-    state: { baseSize },
-  } = useAppContext();
+  const { update } = useGame();
 
   return (
     <div className="game-container">
-      <canvas width={baseSize.width} height={baseSize.height} />
+      <AppCanvas update={update} />
     </div>
   );
 };
