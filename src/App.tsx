@@ -1,16 +1,20 @@
 import React from "react";
 import { Game } from "./components/game/Game";
-import { Scoreboard } from "./components/Scoreboard";
-import { ControlPanel } from "./components/ControlPanel";
-import { AppContainer } from "./components/AppContainer";
+import { HeroPanel } from "./components/HeroPanel";
 
 function App() {
   return (
-    <AppContainer>
-      <Scoreboard />
+    <div className="app-container">
       <Game />
-      <ControlPanel />
-    </AppContainer>
+      <HeroPanel
+        score={0}
+        onchangeHandler={(props) => console.log("Левая панель: ", props)}
+      />
+      <HeroPanel
+        score={0}
+        onchangeHandler={(props) => console.log("Правая панель: ", props)}
+      />
+    </div>
   );
 }
 
