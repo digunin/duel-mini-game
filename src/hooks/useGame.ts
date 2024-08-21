@@ -1,19 +1,20 @@
 import { useRef } from "react";
 import { Point } from "../components/game/game-units/primitives/Point";
 import { Circle } from "../components/game/game-units/Circle";
+import { DefaultFactory } from "../components/game/game-units/GameUnitsFactory";
+import { HTMLCanvasGraphics } from "../components/game/graphics/HTMLCanvasGraphics";
+import { HTMLCanvasCoordConverter } from "../components/game/graphics/HTMLCanvasCoordConverter";
 
-export const useGame = () => {
-  const ball = useRef<Circle>(new Circle(new Point(61, 60), 60));
+export const useGame = (width: number, height: number) => {
+  const unitFactory = new DefaultFactory(
+    new HTMLCanvasGraphics(new HTMLCanvasCoordConverter(width, height))
+  );
+  const ball = useRef<Circle>(unitFactory.createCircle(new Point(61, 60), 60));
 
   const draw = (ctx: CanvasRenderingContext2D) => {
     ctx.clearRect(0, 0, 800, 400);
-    ctx.beginPath();
-    ctx.fillStyle = "red";
-    ctx.lineWidth = 4;
-    const { x, y } = ball.current.center;
-    ctx.arc(x, y, ball.current.radius, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.closePath();
+    unitFactory.graphics.setContext(ctx);
+    ball.current.draw("red");
   };
 
   const update = (ctx: CanvasRenderingContext2D) => {

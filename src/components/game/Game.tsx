@@ -4,8 +4,8 @@ import { AppCanvas } from "../AppCanvas";
 import { useAppContext } from "../../hooks/useAppContext";
 
 export const Game = () => {
-  const { update } = useGame();
   const { scale, baseSize } = useAppContext().state;
+  const { update } = useGame(baseSize.width, baseSize.height);
   const { width, height } = baseSize;
 
   return (

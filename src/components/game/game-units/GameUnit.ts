@@ -1,4 +1,4 @@
-import type { Line } from "./primitives/Line";
+import { AppGraphics } from "../graphics/AppGrphics";
 import { Point } from "./primitives/Point";
 
 export abstract class Unit {
@@ -8,6 +8,7 @@ export abstract class Unit {
   protected _direction: number = 0; // угол между осью X и направлением движения
 
   constructor(
+    protected graphics: AppGraphics,
     public position: Point, // абсолютные координаты нижнего левого угла юнита в декартовых координатах
     public width: number,
     public height: number
@@ -22,7 +23,7 @@ export abstract class Unit {
     return newPos;
   };
 
-  public draw() {}
+  public abstract draw(color: unknown): void;
 
   public get velocity() {
     return this._velocity;
