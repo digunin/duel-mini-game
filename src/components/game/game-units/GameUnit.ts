@@ -6,6 +6,7 @@ export abstract class Unit {
   protected _velocity_X: number = 0;
   protected _velocity_Y: number = 0;
   protected _direction: number = 0; // угол между осью X и направлением движения
+  public color: string = "black";
 
   constructor(
     protected graphics: AppGraphics,
@@ -23,7 +24,7 @@ export abstract class Unit {
     return newPos;
   };
 
-  public abstract draw(color: unknown): void;
+  public abstract draw(): void;
 
   public get velocity() {
     return this._velocity;

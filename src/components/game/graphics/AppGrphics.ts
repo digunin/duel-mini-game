@@ -11,6 +11,10 @@ export abstract class AppGraphics {
     this.coordConverter.setSize(this.screenWidth, this.screenHeight);
   }
 
+  public get size() {
+    return { width: this.screenWidth, height: this.screenHeight };
+  }
+
   public clear() {}
 
   public drawCircle(circle: Circle, color: unknown): void {}

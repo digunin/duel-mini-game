@@ -21,7 +21,7 @@ export class Circle extends Unit {
     this.position.y = c.y - this.radius;
   }
 
-  public draw(color: string): void {
-    this.graphics.drawCircle(this, color);
+  public draw(): void {
+    this.graphics.drawCircle(this, this.color);
   }
 }
