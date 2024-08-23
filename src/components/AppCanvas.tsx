@@ -5,7 +5,8 @@ type AppCanvasProps = {
   scale: number;
   width: number;
   height: number;
-  update: (ctx: CanvasRenderingContext2D) => void;
+  update: () => void;
+  gameCanvasRef: React.RefObject<HTMLCanvasElement>;
 } & React.CanvasHTMLAttributes<HTMLCanvasElement>;
 
 export const AppCanvas: FC<AppCanvasProps> = ({
@@ -13,9 +14,11 @@ export const AppCanvas: FC<AppCanvasProps> = ({
   scale,
   width,
   height,
+  gameCanvasRef,
   ...props
 }) => {
-  const canvasRef = useCanvas(width, height, scale, update);
-
-  return <canvas ref={canvasRef} {...props} />;
+  useCanvas(width, height, scale, update, gameCanvasRef);
+  return (
+    <canvas width={width} height={height} ref={gameCanvasRef} {...props} />
+  );
 };

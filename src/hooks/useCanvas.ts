@@ -4,12 +4,11 @@ const useCanvas = (
   width: number,
   height: number,
   scale: number,
-  update: (ctx: CanvasRenderingContext2D) => void
+  update: () => void,
+  gameCanvasRef: React.RefObject<HTMLCanvasElement>
 ) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
   useEffect(() => {
-    const canvas = canvasRef.current;
+    const canvas = gameCanvasRef.current;
     const context = canvas?.getContext("2d");
     if (canvas == null || context == null) return;
     canvas.width = width * scale;
@@ -18,7 +17,7 @@ const useCanvas = (
     let animationFrameId: number;
 
     const render = () => {
-      update(context);
+      update();
       animationFrameId = window.requestAnimationFrame(render);
     };
     render();
@@ -27,8 +26,6 @@ const useCanvas = (
       window.cancelAnimationFrame(animationFrameId);
     };
   }, [update, scale]);
-
-  return canvasRef;
 };
 
 export default useCanvas;

@@ -2,20 +2,39 @@ import { Circle } from "./../game-units/Circle";
 import { Point } from "../game-units/primitives/Point";
 
 export abstract class AppGraphics {
-  protected context: CanvasRenderingContext2D | null = null;
-  constructor(protected coordConverter: CoordConverter) {}
-
-  public abstract setContext(ctx: unknown): void;
-  public drawCircle(circle: Circle, color: unknown): void {
-    if (this.context == null) {
-      throw new Error("Graphic context is null");
-    }
+  protected _context: unknown | null = null;
+  constructor(
+    protected screenWidth: number,
+    protected screenHeight: number,
+    protected coordConverter: CoordConverter
+  ) {
+    this.coordConverter.setSize(this.screenWidth, this.screenHeight);
   }
+
+  public clear() {}
+
+  public drawCircle(circle: Circle, color: unknown): void {}
 }
 
 export abstract class CoordConverter {
-  constructor(protected screenWidth: number, protected screenHeight: number) {}
+  protected screenWidth: number = 0;
+  protected screenHeight: number = 0;
+  constructor();
+  constructor(screenWidth: number, screenHeight: number);
+  constructor(screenWidth?: number, screenHeight?: number) {
+    if (screenWidth != null && screenHeight != null) {
+      this.screenWidth = screenWidth;
+      this.screenHeight = screenHeight;
+    }
+  }
+
   public convert(p: Point) {
     return p;
   }
+  public setSize(width: number, height: number) {
+    this.screenWidth = width;
+    this.screenHeight = height;
+  }
 }
+
+export class EmptyCoordConverter extends CoordConverter {}
