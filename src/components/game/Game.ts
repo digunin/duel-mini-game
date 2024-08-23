@@ -1,9 +1,11 @@
 import { GameUnitFactory } from "./game-units/GameUnitsFactory";
 import { Hero } from "./game-units/Hero";
 import { Point } from "./game-units/primitives/Point";
+import { intersectCircleWithPoint } from "./game-units/utils";
 import { AppGraphics } from "./graphics/AppGrphics";
 
 const HERO_RADIUS = 55;
+export type HeroSide = "left" | "right";
 
 export class Game {
   private graphics: AppGraphics;
@@ -60,5 +62,11 @@ export class Game {
       return;
     }
     hero.nextMove(true);
+  }
+
+  public isCursorInsideHero(cursor: Point): HeroSide | null {
+    if (intersectCircleWithPoint(this.leftHero, cursor)) return "left";
+    if (intersectCircleWithPoint(this.rightHero, cursor)) return "right";
+    return null;
   }
 }
