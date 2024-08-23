@@ -29,9 +29,11 @@ export const useAppScreen = (): { orient: Orientation } => {
   }, [scale]);
 
   function resizeHandler() {
-    const { clientWidth, clientHeight } = document.documentElement;
+    let { clientWidth, clientHeight } = document.documentElement;
     const panelWidth = 70;
     const panelHeight = 115;
+    const appHeaderHeight = 64;
+    clientHeight -= appHeaderHeight;
 
     let base_ratio = baseSize.width / baseSize.height;
     let client_ratio = clientWidth / clientHeight;

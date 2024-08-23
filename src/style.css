@@ -4,6 +4,19 @@
   box-sizing: border-box;
 }
 
+body {
+  margin-top: 64px;
+}
+
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50px;
+  background-color: rgb(0, 107, 214);
+}
+
 .app-container {
   width: 100%;
   max-width: 1000px;
@@ -60,7 +73,6 @@ canvas {
 .app-container.landscape input[type="range"] {
   writing-mode: vertical-lr;
   direction: rtl;
-  appearance: slider-vertical;
   margin: 5px;
   vertical-align: bottom;
 }
