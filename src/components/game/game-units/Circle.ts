@@ -4,27 +4,10 @@ import { Point } from "./primitives/Point";
 
 export class Circle extends Unit {
   public radius: number;
-  constructor(graphics: AppGraphics, center: Point, radius: number);
-  constructor(
-    graphics: AppGraphics,
-    position: Point,
-    width: number,
-    height: number
-  );
-  constructor(
-    graphics: AppGraphics,
-    center: Point,
-    widthOrRadius: number,
-    height?: number
-  ) {
-    let width = height == null ? widthOrRadius * 2 : widthOrRadius;
-    let position =
-      height == null
-        ? new Point(center.x - widthOrRadius, center.y - widthOrRadius)
-        : center;
-
-    super(graphics, position, width, width);
-    this.radius = width / 2;
+  constructor(graphics: AppGraphics, center: Point, radius: number) {
+    let position = new Point(center.x - radius, center.y - radius);
+    super(graphics, position, radius * 2, radius * 2);
+    this.radius = radius;
   }
 
   public get center() {
@@ -32,6 +15,10 @@ export class Circle extends Unit {
       this.position.x + this.radius,
       this.position.y + this.radius
     );
+  }
+  public set center(c: Point) {
+    this.position.x = c.x - this.radius;
+    this.position.y = c.y - this.radius;
   }
 
   public draw(color: string): void {
