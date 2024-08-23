@@ -4,8 +4,8 @@ import { AppActions, AppState } from "./types";
 
 const initialState: AppState = {
   baseSize: {
-    width: 800,
-    height: 400,
+    width: 1000,
+    height: 500,
   },
   scale: 1,
   leftHero: {

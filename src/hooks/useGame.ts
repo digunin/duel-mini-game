@@ -12,14 +12,14 @@ export const useGame = (width: number, height: number) => {
   const ball = useRef<Circle>(unitFactory.createCircle(new Point(61, 60), 60));
 
   const draw = (ctx: CanvasRenderingContext2D) => {
-    ctx.clearRect(0, 0, 800, 400);
+    ctx.clearRect(0, 0, 1000, 500);
     unitFactory.graphics.setContext(ctx);
     ball.current.draw("red");
   };
 
   const update = (ctx: CanvasRenderingContext2D) => {
     if (ball.current.center.y <= 60) ball.current.velocity_Y = 3;
-    if (ball.current.center.y >= 340) ball.current.velocity_Y = -3;
+    if (ball.current.center.y >= 440) ball.current.velocity_Y = -3;
     ball.current.nextMove(true);
     draw(ctx);
   };
