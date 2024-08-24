@@ -50,7 +50,7 @@ export const HeroPanel: FC<HPProps> = ({ onchangeHandler, values }) => {
             onChange={onSliderChangeHandler}
             name="cooldown"
             min="1"
-            max="11"
+            max="9"
             value={cooldown}
           />
         </div>

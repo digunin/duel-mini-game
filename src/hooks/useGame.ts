@@ -31,8 +31,11 @@ export const useGame = (
     )
   );
 
-  duel.current.setVelocity("left", leftHero.velocity);
-  duel.current.setVelocity("right", rightHero.velocity);
+  duel.current.setHeroVelocity("left", leftHero.velocity);
+  duel.current.setHeroVelocity("right", rightHero.velocity);
+
+  duel.current.setHeroCooldown("left", leftHero.cooldown);
+  duel.current.setHeroCooldown("right", rightHero.cooldown);
 
   function canvasClickHandler() {
     const leftOrRight = duel.current.isCursorInsideHero(canvasCursor.current);

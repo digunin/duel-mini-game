@@ -1,14 +1,18 @@
+import { Circle } from "./game-units/Circle";
 import { GameUnitFactory } from "./game-units/GameUnitsFactory";
 import { Hero } from "./game-units/Hero";
 import { Line } from "./game-units/primitives/Line";
 import { Point } from "./game-units/primitives/Point";
 import {
+  fromDegToRad,
   intersectCircleWithLine,
   intersectCircleWithPoint,
 } from "./game-units/utils";
 import { AppGraphics } from "./graphics/AppGrphics";
 
 const HERO_RADIUS = 55;
+const SPELL_RADIUS = 25;
+
 export type HeroSide = "left" | "right";
 type GameBounds = {
   left: Line;
@@ -24,6 +28,8 @@ export class Game {
   private leftHero: Hero;
   private rightHero: Hero;
   private bounds: GameBounds;
+  private leftHeroSpells: Circle[] = [];
+  private rightHeroSpells: Circle[] = [];
 
   constructor(factory: GameUnitFactory<AppGraphics>) {
     this.factory = factory;
@@ -41,19 +47,28 @@ export class Game {
     );
     this.leftHero.color = "red";
     this.rightHero.color = "green";
-    this.leftHero.direction = 45;
-    this.rightHero.direction = 45;
+    this.leftHero.direction = 90;
+    this.rightHero.direction = 270;
   }
 
   private draw() {
     this.factory.graphics.clear();
     this.leftHero.draw();
     this.rightHero.draw();
+    this.leftHeroSpells.forEach((spell) => spell.draw());
+    this.rightHeroSpells.forEach((spell) => spell.draw());
   }
 
   private _update() {
     this.updateHero(this.leftHero);
     this.updateHero(this.rightHero);
+    if (this.leftHero.fire()) {
+      this.leftHeroSpells.push(this.createSpell(this.leftHero, 0));
+    }
+    if (this.rightHero.fire()) {
+      this.rightHeroSpells.push(this.createSpell(this.rightHero, 180));
+    }
+    this.updateSpells();
     this.draw();
   }
 
@@ -90,11 +105,19 @@ export class Game {
     return null;
   }
 
-  public setVelocity(side: HeroSide, velocity: number) {
+  public setHeroVelocity(side: HeroSide, velocity: number) {
     if (side === "left") {
       this.leftHero.velocity = velocity;
     } else {
       this.rightHero.velocity = velocity;
+    }
+  }
+
+  public setHeroCooldown(side: HeroSide, cooldown: number) {
+    if (side === "left") {
+      this.leftHero.cooldown = cooldown;
+    } else {
+      this.rightHero.cooldown = cooldown;
     }
   }
 
@@ -121,5 +144,29 @@ export class Game {
     yield this.bounds.rigth;
     yield this.bounds.top;
     yield this.bounds.bottom;
+  }
+
+  private updateSpells() {
+    this.leftHeroSpells = this.leftHeroSpells.filter(
+      (spell) => spell.center.x < this.gameWidth
+    );
+    this.rightHeroSpells = this.rightHeroSpells.filter(
+      (spell) => spell.center.x > 0
+    );
+    this.leftHeroSpells.forEach((spell) => spell.nextMove(true));
+    this.rightHeroSpells.forEach((spell) => spell.nextMove(true));
+  }
+
+  private createSpell(hero: Hero, direction: number) {
+    const mod = Math.cos(fromDegToRad(direction)) < 0 ? -1 : 1;
+    const spellCenter = new Point(
+      hero.center.x + (hero.radius + SPELL_RADIUS) * mod,
+      hero.center.y
+    );
+    const spell = this.factory.createCircle(spellCenter, SPELL_RADIUS);
+    spell.color = hero.spellColor;
+    spell.velocity = 15;
+    spell.direction = direction;
+    return spell;
   }
 }
