@@ -8,17 +8,15 @@ const HERO_RADIUS = 55;
 export type HeroSide = "left" | "right";
 
 export class Game {
-  private graphics: AppGraphics;
+  private factory: GameUnitFactory<AppGraphics>;
   private gameWidth: number;
   private gameHeight: number;
   private leftHero: Hero;
   private rightHero: Hero;
 
-  constructor(private factory: GameUnitFactory<AppGraphics>) {
-    this.graphics = factory.graphics;
-    const { width, height } = factory.graphics.size;
-    this.gameWidth = width;
-    this.gameHeight = height;
+  constructor(factory: GameUnitFactory<AppGraphics>) {
+    this.factory = factory;
+    this.setup();
     this.leftHero = factory.createHero(
       new Point(HERO_RADIUS + 1, HERO_RADIUS),
       HERO_RADIUS
@@ -37,7 +35,7 @@ export class Game {
   }
 
   private draw() {
-    this.graphics.clear();
+    this.factory.graphics.clear();
     this.leftHero.draw();
     this.rightHero.draw();
   }
@@ -89,5 +87,11 @@ export class Game {
     } else {
       this.rightHero.velocity = velocity;
     }
+  }
+
+  private setup() {
+    const { width, height } = this.factory.graphics.size;
+    this.gameWidth = width;
+    this.gameHeight = height;
   }
 }

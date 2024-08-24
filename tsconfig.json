@@ -3,7 +3,8 @@
     "strict": true,
     "jsx": "react",
     "esModuleInterop": true,
-    "target": "ES5"
+    "target": "ES5",
+    "strictPropertyInitialization": false
   },
   "include": ["./src"]
 }
