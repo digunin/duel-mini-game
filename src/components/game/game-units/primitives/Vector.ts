@@ -26,4 +26,8 @@ export class Vector {
     if (this._y < 0) return (360 - angle) % 180;
     return angle;
   }
+
+  public multiply(n: number) {
+    return new Vector(Math.round(this._x * n), Math.round(this._y * n));
+  }
 }

@@ -64,8 +64,22 @@ export class Game {
   }
 
   public isCursorInsideHero(cursor: Point): HeroSide | null {
-    if (intersectCircleWithPoint(this.leftHero, cursor)) return "left";
-    if (intersectCircleWithPoint(this.rightHero, cursor)) return "right";
+    if (
+      intersectCircleWithPoint(
+        this.leftHero.center,
+        this.leftHero.radius,
+        cursor
+      )
+    )
+      return "left";
+    if (
+      intersectCircleWithPoint(
+        this.rightHero.center,
+        this.rightHero.radius,
+        cursor
+      )
+    )
+      return "right";
     return null;
   }
 
