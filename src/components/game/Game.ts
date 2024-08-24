@@ -54,7 +54,10 @@ export class Game {
 
   private updateHero(hero: Hero) {
     const nextPos = hero.nextMove();
-    if (nextPos.y <= 0 || nextPos.y >= this.gameHeight - hero.height) {
+    if (
+      nextPos.y <= HERO_RADIUS ||
+      nextPos.y >= this.gameHeight - HERO_RADIUS
+    ) {
       hero.direction = (hero.direction + 180) % 360;
     }
     hero.nextMove(true);

@@ -1,5 +1,6 @@
 import { AppGraphics } from "../graphics/AppGrphics";
 import { Unit } from "./GameUnit";
+import { Line } from "./primitives/Line";
 import { Point } from "./primitives/Point";
 
 export class Circle extends Unit {
@@ -23,5 +24,10 @@ export class Circle extends Unit {
 
   public draw(): void {
     this.graphics.drawCircle(this, this.color);
+  }
+
+  public nextMove(confirmMove?: boolean) {
+    const nextPos = super.nextMove(confirmMove);
+    return new Point(nextPos.x + this.radius, nextPos.y + this.radius);
   }
 }

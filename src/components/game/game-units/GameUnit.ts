@@ -16,14 +16,14 @@ export abstract class Unit {
     public height: number
   ) {}
 
-  public nextMove = (confirmMove?: boolean) => {
+  public nextMove(confirmMove?: boolean) {
     const newPos = new Point(
       this.position.x + this._velocity_X,
       this.position.y + this._velocity_Y
     );
     if (confirmMove) this.position = newPos;
     return newPos;
-  };
+  }
 
   public abstract draw(): void;
 
