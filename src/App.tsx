@@ -3,9 +3,11 @@ import { GameComponent } from "./components/game/GameComponent";
 import { HeroPanel } from "./components/HeroPanel";
 import { useAppScreen } from "./hooks/useAppScreen";
 import { AppHeader } from "./components/AppHeader";
+import { useHeroControl } from "./hooks/useHeroControl";
 
 function App() {
   const { orient } = useAppScreen();
+  const { left, right, setHeroProps } = useHeroControl();
 
   if (orient == "portrait") {
     return (
@@ -16,13 +18,13 @@ function App() {
           <div className="hero-panel-block">
             <HeroPanel
               key="left-panel"
-              score={0}
-              onchangeHandler={(props) => console.log("Левая панель: ", props)}
+              values={left}
+              onchangeHandler={setHeroProps("left")}
             />
             <HeroPanel
               key="right-panel"
-              score={0}
-              onchangeHandler={(props) => console.log("Правая панель: ", props)}
+              values={right}
+              onchangeHandler={setHeroProps("right")}
             />
           </div>
         </div>
@@ -36,14 +38,14 @@ function App() {
       <div className="app-container landscape">
         <HeroPanel
           key="left-panel"
-          score={0}
-          onchangeHandler={(props) => console.log("Левая панель: ", props)}
+          values={left}
+          onchangeHandler={setHeroProps("left")}
         />
         <GameComponent key="game" />
         <HeroPanel
           key="right-panel"
-          score={0}
-          onchangeHandler={(props) => console.log("Правая панель: ", props)}
+          values={right}
+          onchangeHandler={setHeroProps("right")}
         />
       </div>
     </>

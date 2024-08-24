@@ -31,6 +31,7 @@ export class Game {
       HERO_RADIUS
     );
     this.leftHero.velocity_Y = 3;
+    this.rightHero.velocity_Y = -3;
     this.leftHero.color = "red";
     this.rightHero.color = "green";
   }
@@ -54,11 +55,11 @@ export class Game {
   private updateHero(hero: Hero) {
     const nextPos = hero.nextMove();
     if (nextPos.y <= 0) {
-      hero.velocity_Y = 3;
+      hero.velocity_Y *= -1;
       return;
     }
     if (nextPos.y >= this.gameHeight - hero.height) {
-      hero.velocity_Y = -3;
+      hero.velocity_Y *= -1;
       return;
     }
     hero.nextMove(true);
@@ -68,5 +69,17 @@ export class Game {
     if (intersectCircleWithPoint(this.leftHero, cursor)) return "left";
     if (intersectCircleWithPoint(this.rightHero, cursor)) return "right";
     return null;
+  }
+
+  public setVelocity(side: HeroSide, velocity: number) {
+    if (side === "left") {
+      let current = this.leftHero.velocity_Y;
+      let dir = current < 0 ? -1 : 1;
+      this.leftHero.velocity_Y = velocity * dir;
+    } else {
+      let current = this.rightHero.velocity_Y;
+      let dir = current < 0 ? -1 : 1;
+      this.rightHero.velocity_Y = velocity * dir;
+    }
   }
 }

@@ -16,7 +16,7 @@ const reducer = (state: AppState, action: AppActions): AppState => {
       const r_hero = state.rightHero;
       return {
         ...state,
-        leftHero: {
+        rightHero: {
           ...r_hero,
           ...action.payload,
         },

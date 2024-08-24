@@ -4,6 +4,7 @@ import { HTMLCanvasCoordConverter } from "../components/game/graphics/HTMLCanvas
 import { Game } from "../components/game/Game";
 import { useCanvasMousePosition } from "./useCanvasMousePosition";
 import { useRef } from "react";
+import { useAppContext } from "./useAppContext";
 
 export const useGame = (
   width: number,
@@ -15,6 +16,8 @@ export const useGame = (
     height,
     canvasClickHandler
   );
+  const { leftHero, rightHero } = useAppContext().state;
+
   const duel = useRef(
     new Game(
       new DefaultFactory(
@@ -28,9 +31,11 @@ export const useGame = (
     )
   );
 
+  duel.current.setVelocity("left", leftHero.velocity);
+  duel.current.setVelocity("right", rightHero.velocity);
+
   function canvasClickHandler() {
     const leftOrRight = duel.current.isCursorInsideHero(canvasCursor.current);
-    console.log(leftOrRight);
   }
 
   return { update: duel.current.update };
