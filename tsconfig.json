@@ -4,7 +4,8 @@
     "jsx": "react",
     "esModuleInterop": true,
     "target": "ES5",
-    "strictPropertyInitialization": false
+    "strictPropertyInitialization": false,
+    "downlevelIteration": true
   },
   "include": ["./src"]
 }

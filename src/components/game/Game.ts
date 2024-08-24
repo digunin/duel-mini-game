@@ -1,11 +1,18 @@
 import { GameUnitFactory } from "./game-units/GameUnitsFactory";
 import { Hero } from "./game-units/Hero";
+import { Line } from "./game-units/primitives/Line";
 import { Point } from "./game-units/primitives/Point";
 import { intersectCircleWithPoint } from "./game-units/utils";
 import { AppGraphics } from "./graphics/AppGrphics";
 
 const HERO_RADIUS = 55;
 export type HeroSide = "left" | "right";
+type GameBounds = {
+  left: Line;
+  rigth: Line;
+  top: Line;
+  bottom: Line;
+};
 
 export class Game {
   private factory: GameUnitFactory<AppGraphics>;
@@ -13,6 +20,7 @@ export class Game {
   private gameHeight: number;
   private leftHero: Hero;
   private rightHero: Hero;
+  private bounds: GameBounds;
 
   constructor(factory: GameUnitFactory<AppGraphics>) {
     this.factory = factory;
@@ -93,5 +101,24 @@ export class Game {
     const { width, height } = this.factory.graphics.size;
     this.gameWidth = width;
     this.gameHeight = height;
+    this.bounds = {
+      left: new Line(new Point(0, 0), new Point(0, this.gameHeight)),
+      rigth: new Line(
+        new Point(this.gameWidth, 0),
+        new Point(this.gameWidth, this.gameHeight)
+      ),
+      top: new Line(
+        new Point(0, this.gameHeight),
+        new Point(this.gameWidth, this.gameHeight)
+      ),
+      bottom: new Line(new Point(0, 0), new Point(this.gameWidth, 0)),
+    };
+  }
+
+  private *allBounds(): Generator<Line> {
+    yield this.bounds.left;
+    yield this.bounds.rigth;
+    yield this.bounds.top;
+    yield this.bounds.bottom;
   }
 }
