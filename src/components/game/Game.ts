@@ -30,10 +30,10 @@ export class Game {
       ),
       HERO_RADIUS
     );
-    this.leftHero.velocity_Y = 3;
-    this.rightHero.velocity_Y = -3;
     this.leftHero.color = "red";
     this.rightHero.color = "green";
+    this.leftHero.direction = 90;
+    this.rightHero.direction = 270;
   }
 
   private draw() {
@@ -54,13 +54,8 @@ export class Game {
 
   private updateHero(hero: Hero) {
     const nextPos = hero.nextMove();
-    if (nextPos.y <= 0) {
-      hero.velocity_Y *= -1;
-      return;
-    }
-    if (nextPos.y >= this.gameHeight - hero.height) {
-      hero.velocity_Y *= -1;
-      return;
+    if (nextPos.y <= 0 || nextPos.y >= this.gameHeight - hero.height) {
+      hero.direction = (hero.direction + 180) % 360;
     }
     hero.nextMove(true);
   }
@@ -73,13 +68,9 @@ export class Game {
 
   public setVelocity(side: HeroSide, velocity: number) {
     if (side === "left") {
-      let current = this.leftHero.velocity_Y;
-      let dir = current < 0 ? -1 : 1;
-      this.leftHero.velocity_Y = velocity * dir;
+      this.leftHero.velocity = velocity;
     } else {
-      let current = this.rightHero.velocity_Y;
-      let dir = current < 0 ? -1 : 1;
-      this.rightHero.velocity_Y = velocity * dir;
+      this.rightHero.velocity = velocity;
     }
   }
 }

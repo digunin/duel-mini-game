@@ -1,5 +1,6 @@
 import { AppGraphics } from "../graphics/AppGrphics";
 import { Point } from "./primitives/Point";
+import { fromDegToRad } from "./utils";
 
 export abstract class Unit {
   protected _velocity: number = 0;
@@ -40,18 +41,29 @@ export abstract class Unit {
   }
   public set velocity(v) {
     this._velocity = v;
-    // пересчитать _velocity_X и_velocity_Y
+    this.recalcVelocity();
   }
   public set velocity_X(v_X) {
+    throw new Error("Can`t change velocity_X, only velocity");
     this._velocity_X = v_X;
     // пересчитать _velocity и _direction
   }
   public set velocity_Y(v_Y) {
+    throw new Error("Can`t change velocity_Y, only velocity");
     this._velocity_Y = v_Y;
     // пересчитать _velocity и _direction
   }
   public set direction(d) {
     this._direction = d;
-    // пересчитать _velocity_X и_velocity_Y
+    this.recalcVelocity();
+  }
+
+  private recalcVelocity() {
+    this._velocity_X = Math.round(
+      this._velocity * Math.cos(fromDegToRad(this._direction))
+    );
+    this._velocity_Y = Math.round(
+      this._velocity * Math.sin(fromDegToRad(this._direction))
+    );
   }
 }
