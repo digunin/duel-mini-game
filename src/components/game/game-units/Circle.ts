@@ -30,4 +30,11 @@ export class Circle extends Unit {
     const nextPos = super.nextMove(confirmMove);
     return new Point(nextPos.x + this.radius, nextPos.y + this.radius);
   }
+
+  public reflecFromLine(l: Line) {
+    const angle = l.vector.angleBetweenAxisX;
+    const newAngle = (angle * 2 - this._direction) % 360;
+    const d = newAngle < 0 ? 360 + newAngle : newAngle;
+    this.direction = d;
+  }
 }
