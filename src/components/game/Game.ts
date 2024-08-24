@@ -2,7 +2,10 @@ import { GameUnitFactory } from "./game-units/GameUnitsFactory";
 import { Hero } from "./game-units/Hero";
 import { Line } from "./game-units/primitives/Line";
 import { Point } from "./game-units/primitives/Point";
-import { intersectCircleWithPoint } from "./game-units/utils";
+import {
+  intersectCircleWithLine,
+  intersectCircleWithPoint,
+} from "./game-units/utils";
 import { AppGraphics } from "./graphics/AppGrphics";
 
 const HERO_RADIUS = 55;
@@ -26,20 +29,20 @@ export class Game {
     this.factory = factory;
     this.setup();
     this.leftHero = factory.createHero(
-      new Point(HERO_RADIUS + 1, HERO_RADIUS),
+      new Point(HERO_RADIUS + 1, HERO_RADIUS + 1),
       HERO_RADIUS
     );
     this.rightHero = factory.createHero(
       new Point(
         this.gameWidth - HERO_RADIUS - 1,
-        this.gameHeight - HERO_RADIUS
+        this.gameHeight - HERO_RADIUS - 1
       ),
       HERO_RADIUS
     );
     this.leftHero.color = "red";
     this.rightHero.color = "green";
-    this.leftHero.direction = 90;
-    this.rightHero.direction = 270;
+    this.leftHero.direction = 45;
+    this.rightHero.direction = 45;
   }
 
   private draw() {
@@ -60,11 +63,9 @@ export class Game {
 
   private updateHero(hero: Hero) {
     const nextPos = hero.nextMove();
-    if (
-      nextPos.y <= HERO_RADIUS ||
-      nextPos.y >= this.gameHeight - HERO_RADIUS
-    ) {
-      hero.direction = (hero.direction + 180) % 360;
+    for (const bound of this.allBounds()) {
+      if (intersectCircleWithLine(nextPos, hero.radius, bound))
+        hero.reflecFromLine(bound);
     }
     hero.nextMove(true);
   }
