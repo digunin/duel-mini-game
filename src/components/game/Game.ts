@@ -1,4 +1,4 @@
-import { Circle } from "./game-units/Circle";
+import { GameStatus } from "../../store/types";
 import { GameUnitFactory } from "./game-units/GameUnitsFactory";
 import { Hero } from "./game-units/Hero";
 import { Line } from "./game-units/primitives/Line";
@@ -36,25 +36,12 @@ export class Game {
   private eventObserver: EventObserver;
   private _cursorPosition: Point = new Point(0, 0);
   private bindedUpdateMethod: () => void;
+  private gameStatus: GameStatus = GameStatus.IDLE;
 
   constructor(factory: GameUnitFactory<AppGraphics>) {
     this.factory = factory;
     this.setup();
-    this.leftHero = factory.createHero(
-      new Point(HERO_RADIUS + 1, HERO_RADIUS + 1),
-      HERO_RADIUS
-    );
-    this.rightHero = factory.createHero(
-      new Point(
-        this.gameWidth - HERO_RADIUS - 1,
-        this.gameHeight - HERO_RADIUS - 1
-      ),
-      HERO_RADIUS
-    );
-    this.leftHero.color = "red";
-    this.rightHero.color = "green";
-    this.leftHero.direction = 90;
-    this.rightHero.direction = 270;
+    this.initIdle();
   }
 
   private draw() {
@@ -71,7 +58,8 @@ export class Game {
     });
   }
 
-  private _update() {
+  private _updateRunning() {
+    if (this.gameStatus === GameStatus.PAUSED) return;
     this.updateHero(this.leftHero);
     this.updateHero(this.rightHero);
     if (this.leftHero.fire()) {
@@ -85,6 +73,8 @@ export class Game {
     this.updateSpells(this.rightHero, this.leftHeroSpells, "right");
     this.draw();
   }
+
+  private _updateIdle() {}
 
   public get update() {
     return this.bindedUpdateMethod;
@@ -168,8 +158,20 @@ export class Game {
       ),
       bottom: new Line(new Point(0, 0), new Point(this.gameWidth, 0)),
     };
+    this.leftHero = this.factory.createHero(
+      new Point(HERO_RADIUS + 1, HERO_RADIUS + 1),
+      HERO_RADIUS
+    );
+    this.rightHero = this.factory.createHero(
+      new Point(
+        this.gameWidth - HERO_RADIUS - 1,
+        this.gameHeight - HERO_RADIUS - 1
+      ),
+      HERO_RADIUS
+    );
+    this.leftHero.color = "red";
+    this.rightHero.color = "green";
     this.eventObserver = new EventObserver();
-    this.bindedUpdateMethod = this._update.bind(this);
   }
 
   private *allBounds(): Generator<Line> {
@@ -249,5 +251,39 @@ export class Game {
 
   public set cursorPosition(p: Point) {
     this._cursorPosition = p;
+  }
+
+  public setGameStatus(status: GameStatus) {
+    if (status === this.gameStatus) return;
+    if (status === GameStatus.RUNNING) {
+      if (this.gameStatus === GameStatus.IDLE) {
+        console.log("game start");
+
+        this.initRunning();
+        this.bindedUpdateMethod = this._updateRunning.bind(this);
+      }
+    }
+    if (status === GameStatus.IDLE) {
+      this.initIdle();
+    }
+    this.gameStatus = status;
+  }
+
+  private initRunning() {
+    this.leftHero.direction = 90;
+    this.rightHero.direction = 270;
+    this.leftHero.position = new Point(1, 1);
+    this.rightHero.position = new Point(
+      this.gameWidth - HERO_RADIUS * 2 - 1,
+      this.gameHeight - HERO_RADIUS * 2 - 1
+    );
+    this.leftHero.spellColor = "white";
+    this.rightHero.spellColor = "white";
+    this.leftHeroSpells = [];
+    this.rightHeroSpells = [];
+  }
+
+  private initIdle() {
+    this.bindedUpdateMethod = this._updateIdle.bind(this);
   }
 }

@@ -28,7 +28,7 @@ export const useGame = (
     canvas
   );
   const { state, dispatch } = useAppContext();
-  const { leftHero, rightHero } = state;
+  const { leftHero, rightHero, gameStatus } = state;
 
   const duel = useRef(
     new Game(
@@ -53,6 +53,8 @@ export const useGame = (
   duel.current.setHeroSpellColor("right", rightHero.spellColor);
 
   duel.current.cursorPosition = canvasCursor;
+
+  duel.current.setGameStatus(gameStatus);
 
   const heroDamagedHandler = useCallback((e: GameEvent) => {
     dispatch(increaseScore(e.heroDamaged));
