@@ -41,6 +41,9 @@ export const useGame = (
   duel.current.setHeroCooldown("left", leftHero.cooldown);
   duel.current.setHeroCooldown("right", rightHero.cooldown);
 
+  duel.current.setHeroSpellColor("left", leftHero.spellColor);
+  duel.current.setHeroSpellColor("right", rightHero.spellColor);
+
   duel.current.cursorPosition = canvasCursor;
 
   const heroDamagedHandler = useCallback((e: GameEvent) => {

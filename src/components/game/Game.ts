@@ -108,12 +108,12 @@ export class Game {
     hero.nextMove(true);
   }
 
-  public isCursorInsideHero(cursor: Point): HeroSide | null {
+  public isCursorInsideHero(): HeroSide | null {
     if (
       intersectCircleWithPoint(
         this.leftHero.center,
         this.leftHero.radius,
-        cursor
+        this._cursorPosition
       )
     )
       return "left";
@@ -121,7 +121,7 @@ export class Game {
       intersectCircleWithPoint(
         this.rightHero.center,
         this.rightHero.radius,
-        cursor
+        this._cursorPosition
       )
     )
       return "right";
@@ -141,6 +141,14 @@ export class Game {
       this.leftHero.cooldown = cooldown;
     } else {
       this.rightHero.cooldown = cooldown;
+    }
+  }
+
+  public setHeroSpellColor(side: HeroSide, color: string) {
+    if (side === "left") {
+      this.leftHero.spellColor = color;
+    } else {
+      this.rightHero.spellColor = color;
     }
   }
 

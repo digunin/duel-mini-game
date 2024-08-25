@@ -10,14 +10,14 @@ const initialState: AppState = {
   scale: 1,
   leftHero: {
     velocity: 5,
-    cooldown: 6,
-    spellColor: "#00F",
+    cooldown: 5,
+    spellColor: "white",
     score: 0,
   },
   rightHero: {
     velocity: 5,
-    cooldown: 6,
-    spellColor: "#0F0",
+    cooldown: 5,
+    spellColor: "white",
     score: 0,
   },
 };
