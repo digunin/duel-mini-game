@@ -34,6 +34,7 @@ export class Game {
   private leftHeroSpells: Spell[] = [];
   private rightHeroSpells: Spell[] = [];
   private eventObserver: EventObserver;
+  private _cursorPosition: Point = new Point(0, 0);
   private bindedUpdateMethod: () => void;
 
   constructor(factory: GameUnitFactory<AppGraphics>) {
@@ -90,11 +91,20 @@ export class Game {
   }
 
   private updateHero(hero: Hero) {
-    const nextPos = hero.nextMove();
+    let nextPos = hero.nextMove();
+
     for (const bound of this.allBounds()) {
       if (intersectCircleWithLine(nextPos, hero.radius, bound))
         hero.reflecFromLine(bound);
     }
+    nextPos = hero.nextMove();
+
+    if (this.isCircleMeetCursor(nextPos, hero.radius, hero.direction)) {
+      hero.direction = 360 - hero.direction;
+    }
+    nextPos = hero.nextMove();
+    if (this.circleOutOfBounds(nextPos, hero.radius)) return;
+
     hero.nextMove(true);
   }
 
@@ -163,7 +173,8 @@ export class Game {
 
   private updateSpells(hero: Hero, spells: Spell[], side: HeroSide) {
     spells.forEach((spell) => {
-      if (this.spellOutOfBounds(spell)) spell.die();
+      if (this.circleOutOfBounds(spell.center, spell.radius, spell.radius * 2))
+        spell.die();
       if (
         intersectCircleWithCircle(
           spell.center,
@@ -183,8 +194,12 @@ export class Game {
     spells.forEach((spell) => spell.nextMove(true));
   }
 
-  private spellOutOfBounds(spell: Spell) {
-    if (spell.center.x < 0 || spell.center.x > this.gameWidth) return true;
+  private circleOutOfBounds(center: Point, radius: number, shift?: number) {
+    shift = shift ?? 0;
+    if (center.x - radius + shift < 0) return true;
+    if (center.x + radius - shift > this.gameWidth) return true;
+    if (center.y - radius + shift < 0) return true;
+    if (center.y + radius - shift > this.gameHeight) return true;
     return false;
   }
 
@@ -210,5 +225,21 @@ export class Game {
 
   public subscribe(type: EventType, callback: EventCallback) {
     this.eventObserver.subscribe(type, callback);
+  }
+
+  private isCircleMeetCursor(center: Point, radius: number, direction: number) {
+    const collisionPoint = intersectCircleWithPoint(
+      center,
+      radius,
+      this._cursorPosition
+    );
+    if (!collisionPoint) return false;
+    if (collisionPoint.y < center.y && direction === 270) return true;
+    if (collisionPoint.y > center.y && direction === 90) return true;
+    return false;
+  }
+
+  public set cursorPosition(p: Point) {
+    this._cursorPosition = p;
   }
 }

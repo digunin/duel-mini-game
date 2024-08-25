@@ -1,22 +1,28 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 import { Point } from "../components/game/game-units/primitives/Point";
 
 export const useCanvasMousePosition = (
   width: number,
   height: number,
-  onCanvasClick: () => void
+  onCanvasClick: () => void,
+  canvas: React.RefObject<HTMLCanvasElement>
 ) => {
-  const canvasCursor = useRef(new Point(0, 0));
-  const windowCursor = useRef(new Point(0, 0));
+  const [canvasCursor, setCanvasCursor] = useState(new Point(0, 0));
+  const [windowCursor, setWindowCursor] = useState(new Point(0, 0));
 
-  const throttledHandler = throttle(mouseMoveHandler, 48);
+  const throttledHandler = throttle(mouseMoveHandler, 16);
+  const mouseLeaveHandler = () => setCanvasCursor(new Point(0, 0));
 
   useEffect(() => {
-    window.addEventListener("mousemove", throttledHandler);
-    window.addEventListener("mousedown", canvasClickHandler);
+    if (!canvas.current) return;
+    const element = canvas.current;
+    element.addEventListener("mousemove", throttledHandler);
+    element.addEventListener("mousedown", canvasClickHandler);
+    element.addEventListener("mouseleave", mouseLeaveHandler);
     return () => {
-      window.removeEventListener("mousemove", throttledHandler);
-      window.removeEventListener("mousedown", canvasClickHandler);
+      element.removeEventListener("mousemove", throttledHandler);
+      element.removeEventListener("mousedown", canvasClickHandler);
+      element.removeEventListener("mouseleave", mouseLeaveHandler);
     };
   }, []);
 
@@ -27,10 +33,12 @@ export const useCanvasMousePosition = (
 
     const scale = width / bounds.width;
 
-    windowCursor.current = new Point(e.clientX, e.clientY);
-    canvasCursor.current = new Point(
-      Math.round((e.clientX - bounds.left) * scale),
-      height - Math.round((e.clientY - bounds.top) * scale)
+    setWindowCursor(new Point(e.clientX, e.clientY));
+    setCanvasCursor(
+      new Point(
+        Math.round((e.clientX - bounds.left) * scale),
+        height - Math.round((e.clientY - bounds.top) * scale)
+      )
     );
   }
 

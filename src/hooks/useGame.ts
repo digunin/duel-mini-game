@@ -16,7 +16,8 @@ export const useGame = (
   const { canvasCursor, windowCursor } = useCanvasMousePosition(
     width,
     height,
-    canvasClickHandler
+    canvasClickHandler,
+    canvas
   );
   const { state, dispatch } = useAppContext();
   const { leftHero, rightHero } = state;
@@ -40,6 +41,8 @@ export const useGame = (
   duel.current.setHeroCooldown("left", leftHero.cooldown);
   duel.current.setHeroCooldown("right", rightHero.cooldown);
 
+  duel.current.cursorPosition = canvasCursor;
+
   const heroDamagedHandler = useCallback((e: GameEvent) => {
     dispatch(increaseScore(e.heroDamaged));
   }, []);
@@ -47,7 +50,7 @@ export const useGame = (
   duel.current.subscribe("hero-damaged", heroDamagedHandler);
 
   function canvasClickHandler() {
-    const leftOrRight = duel.current.isCursorInsideHero(canvasCursor.current);
+    const leftOrRight = duel.current.isCursorInsideHero(canvasCursor);
   }
 
   return { update: duel.current.update };
