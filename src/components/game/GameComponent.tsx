@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useMemo, useRef } from "react";
 import { useGame } from "../../hooks/useGame";
 import { AppCanvas } from "../AppCanvas";
 import { useAppContext } from "../../hooks/useAppContext";
@@ -9,15 +9,18 @@ export const GameComponent = () => {
   const { update } = useGame(baseSize.width, baseSize.height, gameCanvasRef);
   const { width, height } = baseSize;
 
-  return (
-    <div className="game-container">
-      <AppCanvas
-        width={width}
-        height={height}
-        scale={scale}
-        gameCanvasRef={gameCanvasRef}
-        update={update}
-      />
-    </div>
+  return useMemo(
+    () => (
+      <div className="game-container">
+        <AppCanvas
+          width={width}
+          height={height}
+          scale={scale}
+          gameCanvasRef={gameCanvasRef}
+          update={update}
+        />
+      </div>
+    ),
+    [update, scale, width, height]
   );
 };

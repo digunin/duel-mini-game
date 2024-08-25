@@ -34,6 +34,7 @@ export class Game {
   private leftHeroSpells: Spell[] = [];
   private rightHeroSpells: Spell[] = [];
   private eventObserver: EventObserver;
+  private bindedUpdateMethod: () => void;
 
   constructor(factory: GameUnitFactory<AppGraphics>) {
     this.factory = factory;
@@ -85,7 +86,7 @@ export class Game {
   }
 
   public get update() {
-    return this._update.bind(this);
+    return this.bindedUpdateMethod;
   }
 
   private updateHero(hero: Hero) {
@@ -150,6 +151,7 @@ export class Game {
       bottom: new Line(new Point(0, 0), new Point(this.gameWidth, 0)),
     };
     this.eventObserver = new EventObserver();
+    this.bindedUpdateMethod = this._update.bind(this);
   }
 
   private *allBounds(): Generator<Line> {
