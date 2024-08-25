@@ -23,6 +23,15 @@ const reducer = (state: AppState, action: AppActions): AppState => {
       };
     case ActionType.SET_SCALE:
       return { ...state, scale: action.payload };
+    case ActionType.INCREASE_SCORE:
+      const side = action.payload;
+      const { leftHero, rightHero } = state;
+      if (side === "right") {
+        leftHero.score += 1;
+      } else {
+        rightHero.score += 1;
+      }
+      return { ...state, ...leftHero, ...rightHero };
     default:
       return state;
   }

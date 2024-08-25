@@ -1,6 +1,8 @@
+import { HeroSide } from "../components/game/Game";
 import {
   ActionType,
   AppHero,
+  IncreaseScore,
   SetLeftHero,
   SetRightHero,
   SetScale,
@@ -24,5 +26,12 @@ export const setScale = (scale: number): SetScale => {
   return {
     type: ActionType.SET_SCALE,
     payload: scale,
+  };
+};
+
+export const increaseScore = (hero: HeroSide): IncreaseScore => {
+  return {
+    type: ActionType.INCREASE_SCORE,
+    payload: hero,
   };
 };

@@ -1,3 +1,5 @@
+import { HeroSide } from "../components/game/Game";
+
 export type AppColor = string;
 
 export type AppHero = {
@@ -18,6 +20,7 @@ export enum ActionType {
   SET_LEFT_HERO,
   SET_RIGHT_HERO,
   SET_SCALE,
+  INCREASE_SCORE,
 }
 
 export type SetLeftHero = {
@@ -35,4 +38,9 @@ export type SetScale = {
   payload: number;
 };
 
-export type AppActions = SetLeftHero | SetRightHero | SetScale;
+export type IncreaseScore = {
+  type: ActionType.INCREASE_SCORE;
+  payload: HeroSide;
+};
+
+export type AppActions = SetLeftHero | SetRightHero | SetScale | IncreaseScore;
