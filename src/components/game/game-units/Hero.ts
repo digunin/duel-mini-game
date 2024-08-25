@@ -5,7 +5,7 @@ const COOLDOWN_STEP = 100;
 export class Hero extends Circle {
   private stopFire: boolean = false;
   private _cooldown: number = 5;
-  public spellColor: string = "black";
+  public spellColor: string = "white";
   private damaged = 0;
   private damagedColor = "white";
 
