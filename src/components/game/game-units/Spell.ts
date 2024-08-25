@@ -1,9 +1,13 @@
 import { Circle } from "./Circle";
 
 export class Spell extends Circle {
-  private isAlive: boolean = true;
+  private _isAlive: boolean = true;
 
   public die() {
-    this.isAlive = false;
+    this._isAlive = false;
+  }
+
+  public get isAlive() {
+    return this._isAlive;
   }
 }

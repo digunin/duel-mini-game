@@ -3,8 +3,10 @@ import { ReactCanvasGraphics } from "../components/game/graphics/ReactCanvasGrap
 import { HTMLCanvasCoordConverter } from "../components/game/graphics/HTMLCanvasCoordConverter";
 import { Game } from "../components/game/Game";
 import { useCanvasMousePosition } from "./useCanvasMousePosition";
-import { useRef } from "react";
+import { useCallback, useRef } from "react";
 import { useAppContext } from "./useAppContext";
+import { GameEvent } from "../components/game/GameEvents";
+import { increaseScore } from "../store/actions";
 
 export const useGame = (
   width: number,
@@ -16,7 +18,8 @@ export const useGame = (
     height,
     canvasClickHandler
   );
-  const { leftHero, rightHero } = useAppContext().state;
+  const { state, dispatch } = useAppContext();
+  const { leftHero, rightHero } = state;
 
   const duel = useRef(
     new Game(
@@ -36,6 +39,12 @@ export const useGame = (
 
   duel.current.setHeroCooldown("left", leftHero.cooldown);
   duel.current.setHeroCooldown("right", rightHero.cooldown);
+
+  const heroDamagedHandler = useCallback((e: GameEvent) => {
+    dispatch(increaseScore(e.heroDamaged));
+  }, []);
+
+  duel.current.subscribe("hero-damaged", heroDamagedHandler);
 
   function canvasClickHandler() {
     const leftOrRight = duel.current.isCursorInsideHero(canvasCursor.current);

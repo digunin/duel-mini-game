@@ -19,8 +19,6 @@ export class EventObserver {
   }
 
   public emitEvent(event: GameEvent) {
-    console.log(this.subscribers[event.type].length);
-
     this.subscribers[event.type].forEach((callback) => callback(event));
   }
 }

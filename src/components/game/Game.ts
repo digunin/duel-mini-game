@@ -3,11 +3,14 @@ import { GameUnitFactory } from "./game-units/GameUnitsFactory";
 import { Hero } from "./game-units/Hero";
 import { Line } from "./game-units/primitives/Line";
 import { Point } from "./game-units/primitives/Point";
+import { Spell } from "./game-units/Spell";
 import {
   fromDegToRad,
+  intersectCircleWithCircle,
   intersectCircleWithLine,
   intersectCircleWithPoint,
 } from "./game-units/utils";
+import { EventCallback, EventObserver, EventType } from "./GameEvents";
 import { AppGraphics } from "./graphics/AppGrphics";
 
 const HERO_RADIUS = 55;
@@ -28,8 +31,9 @@ export class Game {
   private leftHero: Hero;
   private rightHero: Hero;
   private bounds: GameBounds;
-  private leftHeroSpells: Circle[] = [];
-  private rightHeroSpells: Circle[] = [];
+  private leftHeroSpells: Spell[] = [];
+  private rightHeroSpells: Spell[] = [];
+  private eventObserver: EventObserver;
 
   constructor(factory: GameUnitFactory<AppGraphics>) {
     this.factory = factory;
@@ -55,8 +59,14 @@ export class Game {
     this.factory.graphics.clear();
     this.leftHero.draw();
     this.rightHero.draw();
-    this.leftHeroSpells.forEach((spell) => spell.draw());
-    this.rightHeroSpells.forEach((spell) => spell.draw());
+    this.drawSpells(this.leftHeroSpells);
+    this.drawSpells(this.rightHeroSpells);
+  }
+
+  private drawSpells(spells: Spell[]) {
+    spells.forEach((spell) => {
+      if (spell.isAlive) spell.draw();
+    });
   }
 
   private _update() {
@@ -68,7 +78,9 @@ export class Game {
     if (this.rightHero.fire()) {
       this.rightHeroSpells.push(this.createSpell(this.rightHero, 180));
     }
-    this.updateSpells();
+    this.deleteDeadSpells();
+    this.updateSpells(this.leftHero, this.rightHeroSpells, "left");
+    this.updateSpells(this.rightHero, this.leftHeroSpells, "right");
     this.draw();
   }
 
@@ -137,6 +149,7 @@ export class Game {
       ),
       bottom: new Line(new Point(0, 0), new Point(this.gameWidth, 0)),
     };
+    this.eventObserver = new EventObserver();
   }
 
   private *allBounds(): Generator<Line> {
@@ -146,15 +159,37 @@ export class Game {
     yield this.bounds.bottom;
   }
 
-  private updateSpells() {
-    this.leftHeroSpells = this.leftHeroSpells.filter(
-      (spell) => spell.center.x < this.gameWidth
-    );
+  private updateSpells(hero: Hero, spells: Spell[], side: HeroSide) {
+    spells.forEach((spell) => {
+      if (this.spellOutOfBounds(spell)) spell.die();
+      if (
+        intersectCircleWithCircle(
+          spell.center,
+          spell.radius,
+          hero.center,
+          hero.radius
+        )
+      ) {
+        spell.die();
+        this.eventObserver.emitEvent({
+          type: "hero-damaged",
+          heroDamaged: side,
+        });
+      }
+    });
+    spells.forEach((spell) => spell.nextMove(true));
+  }
+
+  private spellOutOfBounds(spell: Spell) {
+    if (spell.center.x < 0 || spell.center.x > this.gameWidth) return true;
+    return false;
+  }
+
+  private deleteDeadSpells() {
+    this.leftHeroSpells = this.leftHeroSpells.filter((spell) => spell.isAlive);
     this.rightHeroSpells = this.rightHeroSpells.filter(
-      (spell) => spell.center.x > 0
+      (spell) => spell.isAlive
     );
-    this.leftHeroSpells.forEach((spell) => spell.nextMove(true));
-    this.rightHeroSpells.forEach((spell) => spell.nextMove(true));
   }
 
   private createSpell(hero: Hero, direction: number) {
@@ -163,10 +198,14 @@ export class Game {
       hero.center.x + (hero.radius + SPELL_RADIUS) * mod,
       hero.center.y
     );
-    const spell = this.factory.createCircle(spellCenter, SPELL_RADIUS);
+    const spell = this.factory.createSpell(spellCenter, SPELL_RADIUS);
     spell.color = hero.spellColor;
     spell.velocity = 15;
     spell.direction = direction;
     return spell;
+  }
+
+  public subscribe(type: EventType, callback: EventCallback) {
+    this.eventObserver.subscribe(type, callback);
   }
 }
