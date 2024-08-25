@@ -46,3 +46,18 @@ export function intersectCircleWithLine(
   if (p.length <= radius) return line;
   return null;
 }
+
+export function intersectCircleWithCircle(
+  center_1: Point,
+  radius_1: number,
+  center_2: Point,
+  radius_2: number
+): Point | null {
+  const c_v = new Line(center_1, center_2).vector;
+  if (c_v.length <= radius_1 + radius_2) {
+    const k = radius_1 / (radius_2 + radius_1);
+    const r1_v = c_v.multiply(k);
+    return new Point(center_1.x + r1_v.x, center_1.y + r1_v.y);
+  }
+  return null;
+}
