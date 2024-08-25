@@ -32,6 +32,8 @@ const reducer = (state: AppState, action: AppActions): AppState => {
         rightHero.score += 1;
       }
       return { ...state, ...leftHero, ...rightHero };
+    case ActionType.SET_GAME_STATUS:
+      return { ...state, gameStatus: action.payload };
     default:
       return state;
   }

@@ -1,12 +1,13 @@
 import React, { FC, ReactNode, useReducer } from "react";
 import reducer from "./reducer";
-import { AppActions, AppState } from "./types";
+import { AppActions, AppState, GameStatus } from "./types";
 
 const initialState: AppState = {
   baseSize: {
     width: 1000,
     height: 500,
   },
+  gameStatus: GameStatus.IDLE,
   scale: 1,
   leftHero: {
     velocity: 5,

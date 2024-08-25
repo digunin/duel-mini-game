@@ -14,6 +14,7 @@ export type AppState = {
   scale: number;
   leftHero: AppHero;
   rightHero: AppHero;
+  gameStatus: GameStatus;
 };
 
 export enum ActionType {
@@ -21,6 +22,7 @@ export enum ActionType {
   SET_RIGHT_HERO,
   SET_SCALE,
   INCREASE_SCORE,
+  SET_GAME_STATUS,
 }
 
 export type SetLeftHero = {
@@ -43,4 +45,20 @@ export type IncreaseScore = {
   payload: HeroSide;
 };
 
-export type AppActions = SetLeftHero | SetRightHero | SetScale | IncreaseScore;
+export type SetGameStatus = {
+  type: ActionType.SET_GAME_STATUS;
+  payload: GameStatus;
+};
+
+export type AppActions =
+  | SetLeftHero
+  | SetRightHero
+  | SetScale
+  | IncreaseScore
+  | SetGameStatus;
+
+export enum GameStatus {
+  IDLE,
+  RUNNING,
+  PAUSED,
+}
