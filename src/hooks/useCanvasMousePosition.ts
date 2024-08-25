@@ -18,10 +18,12 @@ export const useCanvasMousePosition = (
     element.addEventListener("mousemove", throttledHandler);
     element.addEventListener("mousedown", onCanvasClick);
     element.addEventListener("mouseleave", mouseLeaveHandler);
+    window.addEventListener("mousedown", mouseMoveHandler);
     return () => {
       element.removeEventListener("mousemove", throttledHandler);
       element.removeEventListener("mousedown", onCanvasClick);
       element.removeEventListener("mouseleave", mouseLeaveHandler);
+      window.removeEventListener("mousedown", mouseMoveHandler);
     };
   }, []);
 
