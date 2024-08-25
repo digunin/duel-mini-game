@@ -173,6 +173,7 @@ export class Game {
         )
       ) {
         spell.die();
+        hero.damage(spell.color);
         this.eventObserver.emitEvent({
           type: "hero-damaged",
           heroDamaged: side,
