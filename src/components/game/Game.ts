@@ -74,7 +74,24 @@ export class Game {
     this.draw();
   }
 
-  private _updateIdle() {}
+  private _updateIdle() {
+    let nextPos = this.leftHero.nextMove();
+
+    for (const bound of this.allBounds()) {
+      if (intersectCircleWithLine(nextPos, this.leftHero.radius, bound))
+        this.leftHero.reflecFromLine(bound);
+    }
+
+    nextPos = this.rightHero.nextMove();
+
+    for (const bound of this.allBounds()) {
+      if (intersectCircleWithLine(nextPos, this.rightHero.radius, bound))
+        this.rightHero.reflecFromLine(bound);
+    }
+    this.leftHero.nextMove(true);
+    this.rightHero.nextMove(true);
+    this.draw();
+  }
 
   public get update() {
     return this.bindedUpdateMethod;
@@ -257,8 +274,6 @@ export class Game {
     if (status === this.gameStatus) return;
     if (status === GameStatus.RUNNING) {
       if (this.gameStatus === GameStatus.IDLE) {
-        console.log("game start");
-
         this.initRunning();
         this.bindedUpdateMethod = this._updateRunning.bind(this);
       }
@@ -284,6 +299,16 @@ export class Game {
   }
 
   private initIdle() {
+    this.leftHero.direction = Math.round(Math.random() * 360);
+    this.rightHero.direction = Math.round(Math.random() * 360);
     this.bindedUpdateMethod = this._updateIdle.bind(this);
+    this.rightHeroSpells = [];
+    this.leftHeroSpells = [];
+    const spell = this.factory.createSpell(
+      new Point(this.gameWidth / 2, this.gameHeight / 2),
+      SPELL_RADIUS
+    );
+    spell.color = "white";
+    this.leftHeroSpells.push(spell);
   }
 }
