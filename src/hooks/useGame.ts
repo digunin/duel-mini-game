@@ -1,19 +1,27 @@
 import { DefaultFactory } from "../components/game/game-units/GameUnitsFactory";
 import { ReactCanvasGraphics } from "../components/game/graphics/ReactCanvasGraphics";
 import { HTMLCanvasCoordConverter } from "../components/game/graphics/HTMLCanvasCoordConverter";
-import { Game } from "../components/game/Game";
+import { Game, HeroSide } from "../components/game/Game";
 import { useCanvasMousePosition } from "./useCanvasMousePosition";
 import { useCallback, useRef } from "react";
 import { useAppContext } from "./useAppContext";
 import { GameEvent } from "../components/game/GameEvents";
 import { increaseScore } from "../store/actions";
+import { Point } from "../components/game/game-units/primitives/Point";
+
+export type HeroClickHandler = (
+  p: Point,
+  hero: HeroSide,
+  canvasRect: DOMRect | undefined
+) => void;
 
 export const useGame = (
   width: number,
   height: number,
-  canvas: React.RefObject<HTMLCanvasElement>
+  canvas: React.RefObject<HTMLCanvasElement>,
+  onHeroClicklHandler: HeroClickHandler
 ) => {
-  const { canvasCursor, windowCursor } = useCanvasMousePosition(
+  const { canvasCursor } = useCanvasMousePosition(
     width,
     height,
     canvasClickHandler,
@@ -52,8 +60,16 @@ export const useGame = (
 
   duel.current.subscribe("hero-damaged", heroDamagedHandler);
 
-  function canvasClickHandler() {
-    const leftOrRight = duel.current.isCursorInsideHero(canvasCursor);
+  function canvasClickHandler(e: MouseEvent) {
+    const leftOrRight = duel.current.isCursorInsideHero();
+    const canvasRect = canvas.current?.getBoundingClientRect();
+    if (leftOrRight) {
+      onHeroClicklHandler(
+        new Point(e.clientX, e.clientY),
+        leftOrRight,
+        canvasRect
+      );
+    }
   }
 
   return { update: duel.current.update };

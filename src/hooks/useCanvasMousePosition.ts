@@ -4,11 +4,10 @@ import { Point } from "../components/game/game-units/primitives/Point";
 export const useCanvasMousePosition = (
   width: number,
   height: number,
-  onCanvasClick: () => void,
+  onCanvasClick: (e: MouseEvent) => void,
   canvas: React.RefObject<HTMLCanvasElement>
 ) => {
   const [canvasCursor, setCanvasCursor] = useState(new Point(0, 0));
-  const [windowCursor, setWindowCursor] = useState(new Point(0, 0));
 
   const throttledHandler = throttle(mouseMoveHandler, 16);
   const mouseLeaveHandler = () => setCanvasCursor(new Point(0, 0));
@@ -17,11 +16,11 @@ export const useCanvasMousePosition = (
     if (!canvas.current) return;
     const element = canvas.current;
     element.addEventListener("mousemove", throttledHandler);
-    element.addEventListener("mousedown", canvasClickHandler);
+    element.addEventListener("mousedown", onCanvasClick);
     element.addEventListener("mouseleave", mouseLeaveHandler);
     return () => {
       element.removeEventListener("mousemove", throttledHandler);
-      element.removeEventListener("mousedown", canvasClickHandler);
+      element.removeEventListener("mousedown", onCanvasClick);
       element.removeEventListener("mouseleave", mouseLeaveHandler);
     };
   }, []);
@@ -33,7 +32,6 @@ export const useCanvasMousePosition = (
 
     const scale = width / bounds.width;
 
-    setWindowCursor(new Point(e.clientX, e.clientY));
     setCanvasCursor(
       new Point(
         Math.round((e.clientX - bounds.left) * scale),
@@ -42,13 +40,7 @@ export const useCanvasMousePosition = (
     );
   }
 
-  function canvasClickHandler(e: MouseEvent) {
-    mouseMoveHandler(e);
-    onCanvasClick();
-  }
-
   return {
-    windowCursor,
     canvasCursor,
   };
 };
