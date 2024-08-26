@@ -19,7 +19,29 @@ header {
   left: 0;
   right: 0;
   height: 50px;
-  background-color: var(--header-color);
+  background-color: rgb(241, 232, 232);
+  display: flex;
+  align-items: center;
+}
+
+header .header-links {
+  margin-left: 1em;
+  display: flex;
+  align-items: center;
+}
+
+header .header-links a {
+  display: flex;
+  align-items: center;
+  margin-left: 5px;
+}
+
+header .header-links img {
+  max-width: 32px;
+}
+
+header .header-buttons {
+  flex-grow: 1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -28,9 +50,14 @@ header {
 header button {
   width: 200px;
   padding: 0.5em;
-  color: var(--header-color);
-  margin: 1em;
+  background-color: var(--header-color);
+  color: white;
+  margin-right: 1em;
   font-weight: bold;
+}
+
+header button:disabled {
+  background-color: rgb(173, 173, 173);
 }
 
 .app-container {
@@ -123,4 +150,14 @@ canvas {
 .color-picker div:last-of-type {
   border: 1px solid black;
   border-top: none;
+}
+
+@media (max-width: 600px) {
+  header button {
+    width: 100px;
+    margin: 1px;
+  }
+  header .header-links {
+    margin: 0;
+  }
 }

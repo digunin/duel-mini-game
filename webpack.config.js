@@ -34,7 +34,7 @@ module.exports = {
     new HTMLWebpackPlugin({
       publicDir: path.join("", path.sep),
       template: "public/index.html",
-      title: "Дуэль - Тестовое задание",
+      title: "Дуэль - мини игра",
     }),
     new CleanWebpackPlugin(),
   ],
