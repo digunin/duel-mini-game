@@ -10,20 +10,18 @@ export const useAppHeader = () => {
 
   const buttonClickHandler = (status: GameStatus) => () => {
     dispatch(setGameStatus(status));
-    if (
-      status === GameStatus.IDLE ||
-      (status === GameStatus.RUNNING && gameStatus !== GameStatus.PAUSED)
-    ) {
-      resetHeroes();
+    if (status === GameStatus.RUNNING && gameStatus !== GameStatus.PAUSED) {
+      resetHeroes(true);
     }
+    if (status === GameStatus.IDLE) resetHeroes(false);
 
-    function resetHeroes() {
+    function resetHeroes(resetScores: boolean) {
       const initialProps: Partial<AppHero> = {
-        score: 0,
         spellColor: "white",
         velocity: 5,
         cooldown: 5,
       };
+      if (resetScores) initialProps.score = 0;
       dispatch(setLeftHero(initialProps));
       dispatch(setRightHero(initialProps));
     }
