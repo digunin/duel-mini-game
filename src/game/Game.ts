@@ -102,6 +102,7 @@ export class Game {
       spell.reflectFromPoint(point);
     }
 
+    if (spell.direction > -2 && spell.direction % 90 < 2) spell.direction += 1;
     spell.nextMove(true);
     this.draw();
   }
@@ -335,12 +336,14 @@ export class Game {
     );
     this.rightHero.velocity = 0;
 
+    const spellRadius = 40;
     const spell = this.factory.createSpell(
-      new Point(this.gameWidth / 2, this.gameHeight / 2),
-      40
+      new Point(spellRadius + 1, spellRadius + 1),
+      spellRadius
     );
     spell.color = "white";
-    spell.direction = Math.round(Math.random() * 360);
+    let dir = Math.round(Math.random() * 88);
+    spell.direction = dir < 2 ? 2 : dir;
     spell.velocity = 15;
     this.rightHeroSpells = [];
     this.leftHeroSpells = [spell];
