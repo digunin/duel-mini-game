@@ -38,11 +38,99 @@ export class Game {
   private bindedUpdateMethod: () => void;
   private gameStatus: GameStatus = GameStatus.IDLE;
 
+  //////////////                                              //////////////
+  //////////////                                              //////////////
+  //////////////                                              //////////////
+  //////////////        constructor, setup, init              //////////////
+  //////////////                                              //////////////
+  //////////////                                              //////////////
+  //////////////                                              //////////////
+
   constructor(factory: GameUnitFactory<AppGraphics>) {
     this.factory = factory;
     this.setup();
     this.initIdle();
   }
+
+  private setup() {
+    const { width, height } = this.factory.graphics.size;
+    this.gameWidth = width;
+    this.gameHeight = height;
+    this.bounds = {
+      left: new Line(new Point(0, 0), new Point(0, this.gameHeight)),
+      rigth: new Line(
+        new Point(this.gameWidth, 0),
+        new Point(this.gameWidth, this.gameHeight)
+      ),
+      top: new Line(
+        new Point(0, this.gameHeight),
+        new Point(this.gameWidth, this.gameHeight)
+      ),
+      bottom: new Line(new Point(0, 0), new Point(this.gameWidth, 0)),
+    };
+    this.leftHero = this.factory.createHero(
+      new Point(HERO_RADIUS + 1, HERO_RADIUS + 1),
+      HERO_RADIUS
+    );
+    this.rightHero = this.factory.createHero(
+      new Point(
+        this.gameWidth - HERO_RADIUS - 1,
+        this.gameHeight - HERO_RADIUS - 1
+      ),
+      HERO_RADIUS
+    );
+    this.leftHero.color = "red";
+    this.rightHero.color = "green";
+    this.eventObserver = new EventObserver();
+  }
+  private initRunning() {
+    this.leftHero.direction = 90;
+    this.rightHero.direction = 270;
+    this.leftHero.position = new Point(1, 1);
+    this.rightHero.position = new Point(
+      this.gameWidth - HERO_RADIUS * 2 - 1,
+      this.gameHeight - HERO_RADIUS * 2 - 1
+    );
+    this.leftHero.spellColor = "white";
+    this.rightHero.spellColor = "white";
+    this.leftHeroSpells = [];
+    this.rightHeroSpells = [];
+  }
+  private initIdle() {
+    this.bindedUpdateMethod = this._updateIdle.bind(this);
+
+    this.leftHero.position = new Point(
+      this.gameWidth / 3 - this.leftHero.radius,
+      this.gameHeight / 2 - this.leftHero.radius
+    );
+    this.leftHero.velocity = 0;
+
+    this.rightHero.position = new Point(
+      (this.gameWidth / 3) * 2 - this.rightHero.radius,
+      this.gameHeight / 2 - this.rightHero.radius
+    );
+    this.rightHero.velocity = 0;
+
+    const spellRadius = 40;
+    const spell = this.factory.createSpell(
+      new Point(spellRadius + 1, spellRadius + 1),
+      spellRadius
+    );
+    spell.color = "white";
+    let dir = Math.round(Math.random() * 88);
+    spell.direction = dir < 2 ? 2 : dir;
+    spell.velocity = 15;
+    this.rightHeroSpells = [];
+    this.leftHeroSpells = [spell];
+  }
+
+  //////////////                                              //////////////
+  //////////////                                              //////////////
+  //////////////                                              //////////////
+  //////////////                draw, update                  //////////////
+  //////////////                                              //////////////
+  //////////////                                              //////////////
+  //////////////                                              //////////////
 
   private draw() {
     this.factory.graphics.clear();
@@ -127,6 +215,64 @@ export class Game {
     hero.nextMove(true);
   }
 
+  private updateSpells(hero: Hero, spells: Spell[], side: HeroSide) {
+    spells.forEach((spell) => {
+      if (this.circleOutOfBounds(spell.center, spell.radius, spell.radius * 2))
+        spell.die();
+      if (
+        intersectCircleWithCircle(
+          spell.center,
+          spell.radius,
+          hero.center,
+          hero.radius
+        )
+      ) {
+        spell.die();
+        hero.damage(spell.color);
+        this.eventObserver.emitEvent({
+          type: "hero-damaged",
+          heroDamaged: side,
+        });
+      }
+    });
+    spells.forEach((spell) => spell.nextMove(true));
+  }
+
+  private createSpell(hero: Hero, direction: number) {
+    const mod = Math.cos(fromDegToRad(direction)) < 0 ? -1 : 1;
+    const spellCenter = new Point(
+      hero.center.x + (hero.radius + SPELL_RADIUS) * mod,
+      hero.center.y
+    );
+    const spell = this.factory.createSpell(spellCenter, SPELL_RADIUS);
+    spell.color = hero.spellColor;
+    spell.velocity = 15;
+    spell.direction = direction;
+    return spell;
+  }
+
+  private deleteDeadSpells() {
+    this.leftHeroSpells = this.leftHeroSpells.filter((spell) => spell.isAlive);
+    this.rightHeroSpells = this.rightHeroSpells.filter(
+      (spell) => spell.isAlive
+    );
+  }
+
+  //////////////                                              //////////////
+  //////////////                                              //////////////
+  //////////////                                              //////////////
+  //////////////                collision                     //////////////
+  //////////////                                              //////////////
+  //////////////                                              //////////////
+  //////////////                                              //////////////
+
+  private *allBounds(): Generator<Line> {
+    yield this.bounds.left;
+    yield this.bounds.rigth;
+    yield this.bounds.top;
+    yield this.bounds.bottom;
+  }
+
   private checkCollideWithBounds(center: Point, radius: number): Line | null {
     for (const bound of this.allBounds()) {
       if (intersectCircleWithLine(center, radius, bound)) return bound;
@@ -152,6 +298,49 @@ export class Game {
     )
       return "right";
     return null;
+  }
+
+  private circleOutOfBounds(center: Point, radius: number, shift?: number) {
+    shift = shift ?? 0;
+    if (center.x - radius + shift < 0) return true;
+    if (center.x + radius - shift > this.gameWidth) return true;
+    if (center.y - radius + shift < 0) return true;
+    if (center.y + radius - shift > this.gameHeight) return true;
+    return false;
+  }
+
+  private isCircleMeetCursor(center: Point, radius: number, direction: number) {
+    const collisionPoint = intersectCircleWithPoint(
+      center,
+      radius,
+      this._cursorPosition
+    );
+    if (!collisionPoint) return false;
+    if (collisionPoint.y < center.y && direction === 270) return true;
+    if (collisionPoint.y > center.y && direction === 90) return true;
+    return false;
+  }
+
+  //////////////                                              //////////////
+  //////////////                                              //////////////
+  //////////////                                              //////////////
+  //////////////        change game state from outside        //////////////
+  //////////////                                              //////////////
+  //////////////                                              //////////////
+  //////////////                                              //////////////
+
+  public setGameStatus(status: GameStatus) {
+    if (status === this.gameStatus) return;
+    if (status === GameStatus.RUNNING) {
+      if (this.gameStatus === GameStatus.IDLE) {
+        this.initRunning();
+        this.bindedUpdateMethod = this._updateRunning.bind(this);
+      }
+    }
+    if (status === GameStatus.IDLE) {
+      this.initIdle();
+    }
+    this.gameStatus = status;
   }
 
   public setHeroVelocity(side: HeroSide, velocity: number) {
@@ -182,170 +371,12 @@ export class Game {
     }
   }
 
-  private setup() {
-    const { width, height } = this.factory.graphics.size;
-    this.gameWidth = width;
-    this.gameHeight = height;
-    this.bounds = {
-      left: new Line(new Point(0, 0), new Point(0, this.gameHeight)),
-      rigth: new Line(
-        new Point(this.gameWidth, 0),
-        new Point(this.gameWidth, this.gameHeight)
-      ),
-      top: new Line(
-        new Point(0, this.gameHeight),
-        new Point(this.gameWidth, this.gameHeight)
-      ),
-      bottom: new Line(new Point(0, 0), new Point(this.gameWidth, 0)),
-    };
-    this.leftHero = this.factory.createHero(
-      new Point(HERO_RADIUS + 1, HERO_RADIUS + 1),
-      HERO_RADIUS
-    );
-    this.rightHero = this.factory.createHero(
-      new Point(
-        this.gameWidth - HERO_RADIUS - 1,
-        this.gameHeight - HERO_RADIUS - 1
-      ),
-      HERO_RADIUS
-    );
-    this.leftHero.color = "red";
-    this.rightHero.color = "green";
-    this.eventObserver = new EventObserver();
-  }
-
-  private *allBounds(): Generator<Line> {
-    yield this.bounds.left;
-    yield this.bounds.rigth;
-    yield this.bounds.top;
-    yield this.bounds.bottom;
-  }
-
-  private updateSpells(hero: Hero, spells: Spell[], side: HeroSide) {
-    spells.forEach((spell) => {
-      if (this.circleOutOfBounds(spell.center, spell.radius, spell.radius * 2))
-        spell.die();
-      if (
-        intersectCircleWithCircle(
-          spell.center,
-          spell.radius,
-          hero.center,
-          hero.radius
-        )
-      ) {
-        spell.die();
-        hero.damage(spell.color);
-        this.eventObserver.emitEvent({
-          type: "hero-damaged",
-          heroDamaged: side,
-        });
-      }
-    });
-    spells.forEach((spell) => spell.nextMove(true));
-  }
-
-  private circleOutOfBounds(center: Point, radius: number, shift?: number) {
-    shift = shift ?? 0;
-    if (center.x - radius + shift < 0) return true;
-    if (center.x + radius - shift > this.gameWidth) return true;
-    if (center.y - radius + shift < 0) return true;
-    if (center.y + radius - shift > this.gameHeight) return true;
-    return false;
-  }
-
-  private deleteDeadSpells() {
-    this.leftHeroSpells = this.leftHeroSpells.filter((spell) => spell.isAlive);
-    this.rightHeroSpells = this.rightHeroSpells.filter(
-      (spell) => spell.isAlive
-    );
-  }
-
-  private createSpell(hero: Hero, direction: number) {
-    const mod = Math.cos(fromDegToRad(direction)) < 0 ? -1 : 1;
-    const spellCenter = new Point(
-      hero.center.x + (hero.radius + SPELL_RADIUS) * mod,
-      hero.center.y
-    );
-    const spell = this.factory.createSpell(spellCenter, SPELL_RADIUS);
-    spell.color = hero.spellColor;
-    spell.velocity = 15;
-    spell.direction = direction;
-    return spell;
-  }
-
-  public subscribe(type: EventType, callback: EventCallback) {
-    this.eventObserver.subscribe(type, callback);
-  }
-
-  private isCircleMeetCursor(center: Point, radius: number, direction: number) {
-    const collisionPoint = intersectCircleWithPoint(
-      center,
-      radius,
-      this._cursorPosition
-    );
-    if (!collisionPoint) return false;
-    if (collisionPoint.y < center.y && direction === 270) return true;
-    if (collisionPoint.y > center.y && direction === 90) return true;
-    return false;
-  }
-
   public set cursorPosition(p: Point) {
     this._cursorPosition = p;
   }
 
-  public setGameStatus(status: GameStatus) {
-    if (status === this.gameStatus) return;
-    if (status === GameStatus.RUNNING) {
-      if (this.gameStatus === GameStatus.IDLE) {
-        this.initRunning();
-        this.bindedUpdateMethod = this._updateRunning.bind(this);
-      }
-    }
-    if (status === GameStatus.IDLE) {
-      this.initIdle();
-    }
-    this.gameStatus = status;
-  }
-
-  private initRunning() {
-    this.leftHero.direction = 90;
-    this.rightHero.direction = 270;
-    this.leftHero.position = new Point(1, 1);
-    this.rightHero.position = new Point(
-      this.gameWidth - HERO_RADIUS * 2 - 1,
-      this.gameHeight - HERO_RADIUS * 2 - 1
-    );
-    this.leftHero.spellColor = "white";
-    this.rightHero.spellColor = "white";
-    this.leftHeroSpells = [];
-    this.rightHeroSpells = [];
-  }
-
-  private initIdle() {
-    this.bindedUpdateMethod = this._updateIdle.bind(this);
-
-    this.leftHero.position = new Point(
-      this.gameWidth / 3 - this.leftHero.radius,
-      this.gameHeight / 2 - this.leftHero.radius
-    );
-    this.leftHero.velocity = 0;
-
-    this.rightHero.position = new Point(
-      (this.gameWidth / 3) * 2 - this.rightHero.radius,
-      this.gameHeight / 2 - this.rightHero.radius
-    );
-    this.rightHero.velocity = 0;
-
-    const spellRadius = 40;
-    const spell = this.factory.createSpell(
-      new Point(spellRadius + 1, spellRadius + 1),
-      spellRadius
-    );
-    spell.color = "white";
-    let dir = Math.round(Math.random() * 88);
-    spell.direction = dir < 2 ? 2 : dir;
-    spell.velocity = 15;
-    this.rightHeroSpells = [];
-    this.leftHeroSpells = [spell];
+  // subscribe
+  public subscribe(type: EventType, callback: EventCallback) {
+    this.eventObserver.subscribe(type, callback);
   }
 }
