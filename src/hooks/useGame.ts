@@ -11,7 +11,7 @@ import { Point } from "../components/game/game-units/primitives/Point";
 
 export type HeroClickHandler = (
   p: Point,
-  hero: HeroSide,
+  hero: HeroSide | null,
   canvasRect: DOMRect | undefined
 ) => void;
 
@@ -65,13 +65,11 @@ export const useGame = (
   function canvasClickHandler(e: MouseEvent) {
     const leftOrRight = duel.current.isCursorInsideHero();
     const canvasRect = canvas.current?.getBoundingClientRect();
-    if (leftOrRight) {
-      onHeroClicklHandler(
-        new Point(e.clientX, e.clientY),
-        leftOrRight,
-        canvasRect
-      );
-    }
+    onHeroClicklHandler(
+      new Point(e.clientX, e.clientY),
+      leftOrRight,
+      canvasRect
+    );
   }
 
   return { update: duel.current.update };

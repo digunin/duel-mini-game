@@ -18,6 +18,9 @@ function App() {
   const [menuPosition, setMenuPosition] = useState<Point | null>(null);
   const [activeHero, setActiveHero] = useState<HeroSide>("left");
 
+  const MENU_WIDTH = 100;
+  const MENU_HEIGHT = 200;
+
   const onColorChangeHandler = (spellColor: string) => {
     if (activeHero === "left") {
       dispatch(setLeftHero({ spellColor }));
@@ -28,9 +31,13 @@ function App() {
   };
 
   const onHeroClicklHandler: HeroClickHandler = (point, hero, canvasRect) => {
+    if (!hero) {
+      setMenuPosition(null);
+      return;
+    }
     const menuPosition = new Point(
-      Math.min(point.x, canvasRect!.right - 110 || point.x),
-      Math.min(point.y, canvasRect!.bottom - 200 || point.y)
+      Math.min(point.x, canvasRect!.right - MENU_WIDTH - 10 || point.x),
+      Math.min(point.y, canvasRect!.bottom - MENU_HEIGHT || point.y)
     );
     setMenuPosition(menuPosition);
     setActiveHero(hero);
