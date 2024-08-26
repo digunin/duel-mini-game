@@ -119,3 +119,8 @@ canvas {
   font-size: 14px;
   text-align: center;
 }
+
+.color-picker div:last-of-type {
+  border: 1px solid black;
+  border-top: none;
+}
