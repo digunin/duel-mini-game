@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Point } from "../components/game/game-units/primitives/Point";
+import { Point } from "../game/game-units/primitives/Point";
 
 export const useCanvasMousePosition = (
   width: number,

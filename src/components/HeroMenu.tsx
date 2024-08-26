@@ -1,5 +1,5 @@
 import React, { FC } from "react";
-import { Point } from "./game/game-units/primitives/Point";
+import { Point } from "../game/game-units/primitives/Point";
 
 type HMProps = {
   position: Point;

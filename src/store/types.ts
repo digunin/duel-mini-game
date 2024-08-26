@@ -1,4 +1,4 @@
-import { HeroSide } from "../components/game/Game";
+import { HeroSide } from "../game/Game";
 
 export type AppColor = string;
 

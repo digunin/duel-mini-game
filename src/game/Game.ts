@@ -1,4 +1,4 @@
-import { GameStatus } from "../../store/types";
+import { GameStatus } from "../store/types";
 import { GameUnitFactory } from "./game-units/GameUnitsFactory";
 import { Hero } from "./game-units/Hero";
 import { Line } from "./game-units/primitives/Line";

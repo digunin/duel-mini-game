@@ -1,7 +1,7 @@
 import React, { FC, useMemo, useRef } from "react";
-import { HeroClickHandler, useGame } from "../../hooks/useGame";
-import { AppCanvas } from "../AppCanvas";
-import { useAppContext } from "../../hooks/useAppContext";
+import { HeroClickHandler, useGame } from "../hooks/useGame";
+import { AppCanvas } from "./AppCanvas";
+import { useAppContext } from "../hooks/useAppContext";
 
 type GCProps = {
   onHeroClicklHandler: HeroClickHandler;

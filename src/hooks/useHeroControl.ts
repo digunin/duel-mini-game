@@ -1,4 +1,4 @@
-import { HeroSide } from "../components/game/Game";
+import { HeroSide } from "../game/Game";
 import { AppHero } from "../store/types";
 import { setLeftHero, setRightHero } from "../store/actions";
 import { useAppContext } from "./useAppContext";

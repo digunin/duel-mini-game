@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { GameComponent } from "./components/game/GameComponent";
+import React from "react";
+import { GameComponent } from "./components/GameComponent";
 import { HeroPanel } from "./components/HeroPanel";
 import { useAppScreen } from "./hooks/useAppScreen";
 import { AppHeader } from "./components/AppHeader";

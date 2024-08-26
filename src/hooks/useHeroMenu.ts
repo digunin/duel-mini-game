@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAppContext } from "./useAppContext";
-import { Point } from "../components/game/game-units/primitives/Point";
-import { HeroSide } from "../components/game/Game";
+import { Point } from "../game/game-units/primitives/Point";
+import { HeroSide } from "../game/Game";
 import { setLeftHero, setRightHero } from "../store/actions";
 import { HeroClickHandler } from "./useGame";
 

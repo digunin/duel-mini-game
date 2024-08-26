@@ -1,13 +1,13 @@
-import { DefaultFactory } from "../components/game/game-units/GameUnitsFactory";
-import { ReactCanvasGraphics } from "../components/game/graphics/ReactCanvasGraphics";
-import { HTMLCanvasCoordConverter } from "../components/game/graphics/HTMLCanvasCoordConverter";
-import { Game, HeroSide } from "../components/game/Game";
+import { DefaultFactory } from "../game/game-units/GameUnitsFactory";
+import { ReactCanvasGraphics } from "../game/graphics/ReactCanvasGraphics";
+import { HTMLCanvasCoordConverter } from "../game/graphics/HTMLCanvasCoordConverter";
+import { Game, HeroSide } from "../game/Game";
 import { useCanvasMousePosition } from "./useCanvasMousePosition";
 import { useCallback, useRef } from "react";
 import { useAppContext } from "./useAppContext";
-import { GameEvent } from "../components/game/GameEvents";
+import { GameEvent } from "../game/GameEvents";
 import { increaseScore } from "../store/actions";
-import { Point } from "../components/game/game-units/primitives/Point";
+import { Point } from "../game/game-units/primitives/Point";
 
 export type HeroClickHandler = (
   p: Point,
