@@ -1,7 +1,18 @@
-import { fromRadToDeg } from "../utils";
+import { fromDegToRad, fromRadToDeg } from "../utils";
 
 export class Vector {
-  constructor(private _x: number, private _y: number) {}
+  private _x: number;
+  private _y: number;
+  constructor(x: number, y: number);
+  constructor(angleBetweenAxisX: number);
+  constructor(angleOrX: number, y?: number) {
+    if (y != null) {
+      (this._x = angleOrX), (this._y = y);
+    } else {
+      this._x = Math.cos(fromDegToRad(angleOrX));
+      this._y = Math.sin(fromDegToRad(angleOrX));
+    }
+  }
 
   public get x() {
     return this._x;

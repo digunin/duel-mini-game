@@ -2,6 +2,7 @@ import { AppGraphics } from "../graphics/AppGrphics";
 import { Unit } from "./GameUnit";
 import { Line } from "./primitives/Line";
 import { Point } from "./primitives/Point";
+import { Vector } from "./primitives/Vector";
 
 export class Circle extends Unit {
   public radius: number;
@@ -36,5 +37,13 @@ export class Circle extends Unit {
     const newAngle = (angle * 2 - this._direction) % 360;
     const d = newAngle < 0 ? 360 + newAngle : newAngle;
     this.direction = d;
+  }
+
+  public reflectFromPoint(p: Point) {
+    const v = new Vector(this.center.x - p.x, this.center.y - p.y);
+    const perpend = new Vector(v.angleBetweenAxisX + 90);
+    this.reflecFromLine(
+      new Line(new Point(0, 0), new Point(perpend.x, perpend.y))
+    );
   }
 }
