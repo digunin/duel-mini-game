@@ -1,28 +1,18 @@
 import { GameStatus } from "../store/types";
+import { GameDirector } from "./game-director/GameDirector";
+import { IdleGameDirector } from "./game-director/IdleGameDirector";
+import { RunningGameDirector } from "./game-director/RunningGameDirector";
 import { GameUnitFactory } from "./game-units/GameUnitsFactory";
 import { Hero } from "./game-units/Hero";
-import { Line } from "./game-units/primitives/Line";
 import { Point } from "./game-units/primitives/Point";
 import { Spell } from "./game-units/Spell";
-import {
-  fromDegToRad,
-  intersectCircleWithCircle,
-  intersectCircleWithLine,
-  intersectCircleWithPoint,
-} from "./game-units/utils";
+import { intersectCircleWithPoint } from "./game-units/utils";
 import { EventCallback, EventObserver, EventType } from "./GameEvents";
 import { AppGraphics } from "./graphics/AppGrphics";
 
 const HERO_RADIUS = 55;
-const SPELL_RADIUS = 25;
 
 export type HeroSide = "left" | "right";
-type GameBounds = {
-  left: Line;
-  rigth: Line;
-  top: Line;
-  bottom: Line;
-};
 
 export class Game {
   private factory: GameUnitFactory<AppGraphics>;
@@ -30,13 +20,13 @@ export class Game {
   private gameHeight: number;
   private leftHero: Hero;
   private rightHero: Hero;
-  private bounds: GameBounds;
   private leftHeroSpells: Spell[] = [];
   private rightHeroSpells: Spell[] = [];
   private eventObserver: EventObserver;
   private _cursorPosition: Point = new Point(0, 0);
-  private bindedUpdateMethod: () => void;
+  private bindedUpdateMethod = this._update.bind(this);
   private gameStatus: GameStatus = GameStatus.IDLE;
+  private gameDirector: GameDirector;
 
   //////////////                                              //////////////
   //////////////                                              //////////////
@@ -56,18 +46,6 @@ export class Game {
     const { width, height } = this.factory.graphics.size;
     this.gameWidth = width;
     this.gameHeight = height;
-    this.bounds = {
-      left: new Line(new Point(0, 0), new Point(0, this.gameHeight)),
-      rigth: new Line(
-        new Point(this.gameWidth, 0),
-        new Point(this.gameWidth, this.gameHeight)
-      ),
-      top: new Line(
-        new Point(0, this.gameHeight),
-        new Point(this.gameWidth, this.gameHeight)
-      ),
-      bottom: new Line(new Point(0, 0), new Point(this.gameWidth, 0)),
-    };
     this.leftHero = this.factory.createHero(
       new Point(HERO_RADIUS + 1, HERO_RADIUS + 1),
       HERO_RADIUS
@@ -83,7 +61,14 @@ export class Game {
     this.rightHero.color = "green";
     this.eventObserver = new EventObserver();
   }
+
   private initRunning() {
+    this.gameDirector = new RunningGameDirector(
+      this.factory,
+      this.eventObserver,
+      this.gameWidth,
+      this.gameHeight
+    );
     this.leftHero.direction = 90;
     this.rightHero.direction = 270;
     this.leftHero.position = new Point(1, 1);
@@ -96,8 +81,14 @@ export class Game {
     this.leftHeroSpells = [];
     this.rightHeroSpells = [];
   }
+
   private initIdle() {
-    this.bindedUpdateMethod = this._updateIdle.bind(this);
+    this.gameDirector = new IdleGameDirector(
+      this.factory,
+      this.eventObserver,
+      this.gameWidth,
+      this.gameHeight
+    );
 
     this.leftHero.position = new Point(
       this.gameWidth / 3 - this.leftHero.radius,
@@ -146,179 +137,26 @@ export class Game {
     });
   }
 
-  private _updateRunning() {
-    if (this.gameStatus === GameStatus.PAUSED) return;
-    this.updateHero(this.leftHero);
-    this.updateHero(this.rightHero);
-    if (this.leftHero.fire()) {
-      this.leftHeroSpells.push(this.createSpell(this.leftHero, 0));
-    }
-    if (this.rightHero.fire()) {
-      this.rightHeroSpells.push(this.createSpell(this.rightHero, 180));
-    }
-    this.deleteDeadSpells();
-    this.updateSpells(this.leftHero, this.rightHeroSpells, "left");
-    this.updateSpells(this.rightHero, this.leftHeroSpells, "right");
-    this.draw();
-  }
-
-  private _updateIdle() {
-    const spell = this.leftHeroSpells[0];
-    let next_pos = spell.nextMove();
-    let bound = this.checkCollideWithBounds(next_pos, spell.radius);
-    if (bound) spell.reflecFromLine(bound);
-
-    let point = intersectCircleWithCircle(
-      next_pos,
-      spell.radius,
-      this.leftHero.center,
-      this.leftHero.radius
+  private _update() {
+    this.gameDirector.update(
+      {
+        heroes: {
+          left: this.leftHero,
+          right: this.rightHero,
+        },
+        spells: {
+          left: this.leftHeroSpells,
+          right: this.rightHeroSpells,
+        },
+        cursorPosition: this._cursorPosition,
+      },
+      this.gameStatus
     );
-    if (point) {
-      this.leftHero.damage(spell.color);
-      spell.reflectFromPoint(point);
-    }
-
-    point = intersectCircleWithCircle(
-      next_pos,
-      spell.radius,
-      this.rightHero.center,
-      this.rightHero.radius
-    );
-    if (point) {
-      this.rightHero.damage(spell.color);
-      spell.reflectFromPoint(point);
-    }
-
-    if (spell.direction > -2 && spell.direction % 90 < 2) spell.direction += 1;
-    spell.nextMove(true);
     this.draw();
   }
 
   public get update() {
     return this.bindedUpdateMethod;
-  }
-
-  private updateHero(hero: Hero) {
-    let nextPos = hero.nextMove();
-    let bound = this.checkCollideWithBounds(nextPos, hero.radius);
-    if (bound) hero.reflecFromLine(bound);
-
-    nextPos = hero.nextMove();
-    if (this.isCircleMeetCursor(nextPos, hero.radius, hero.direction)) {
-      hero.direction = 360 - hero.direction;
-    }
-
-    nextPos = hero.nextMove();
-    if (this.circleOutOfBounds(nextPos, hero.radius)) return;
-
-    hero.nextMove(true);
-  }
-
-  private updateSpells(hero: Hero, spells: Spell[], side: HeroSide) {
-    spells.forEach((spell) => {
-      if (this.circleOutOfBounds(spell.center, spell.radius, spell.radius * 2))
-        spell.die();
-      if (
-        intersectCircleWithCircle(
-          spell.center,
-          spell.radius,
-          hero.center,
-          hero.radius
-        )
-      ) {
-        spell.die();
-        hero.damage(spell.color);
-        this.eventObserver.emitEvent({
-          type: "hero-damaged",
-          heroDamaged: side,
-        });
-      }
-    });
-    spells.forEach((spell) => spell.nextMove(true));
-  }
-
-  private createSpell(hero: Hero, direction: number) {
-    const mod = Math.cos(fromDegToRad(direction)) < 0 ? -1 : 1;
-    const spellCenter = new Point(
-      hero.center.x + (hero.radius + SPELL_RADIUS) * mod,
-      hero.center.y
-    );
-    const spell = this.factory.createSpell(spellCenter, SPELL_RADIUS);
-    spell.color = hero.spellColor;
-    spell.velocity = 15;
-    spell.direction = direction;
-    return spell;
-  }
-
-  private deleteDeadSpells() {
-    this.leftHeroSpells = this.leftHeroSpells.filter((spell) => spell.isAlive);
-    this.rightHeroSpells = this.rightHeroSpells.filter(
-      (spell) => spell.isAlive
-    );
-  }
-
-  //////////////                                              //////////////
-  //////////////                                              //////////////
-  //////////////                                              //////////////
-  //////////////                collision                     //////////////
-  //////////////                                              //////////////
-  //////////////                                              //////////////
-  //////////////                                              //////////////
-
-  private *allBounds(): Generator<Line> {
-    yield this.bounds.left;
-    yield this.bounds.rigth;
-    yield this.bounds.top;
-    yield this.bounds.bottom;
-  }
-
-  private checkCollideWithBounds(center: Point, radius: number): Line | null {
-    for (const bound of this.allBounds()) {
-      if (intersectCircleWithLine(center, radius, bound)) return bound;
-    }
-    return null;
-  }
-
-  public isCursorInsideHero(): HeroSide | null {
-    if (
-      intersectCircleWithPoint(
-        this.leftHero.center,
-        this.leftHero.radius,
-        this._cursorPosition
-      )
-    )
-      return this.gameStatus === GameStatus.IDLE ? "right" : "left";
-    if (
-      intersectCircleWithPoint(
-        this.rightHero.center,
-        this.rightHero.radius,
-        this._cursorPosition
-      )
-    )
-      return "right";
-    return null;
-  }
-
-  private circleOutOfBounds(center: Point, radius: number, shift?: number) {
-    shift = shift ?? 0;
-    if (center.x - radius + shift < 0) return true;
-    if (center.x + radius - shift > this.gameWidth) return true;
-    if (center.y - radius + shift < 0) return true;
-    if (center.y + radius - shift > this.gameHeight) return true;
-    return false;
-  }
-
-  private isCircleMeetCursor(center: Point, radius: number, direction: number) {
-    const collisionPoint = intersectCircleWithPoint(
-      center,
-      radius,
-      this._cursorPosition
-    );
-    if (!collisionPoint) return false;
-    if (collisionPoint.y < center.y && direction === 270) return true;
-    if (collisionPoint.y > center.y && direction === 90) return true;
-    return false;
   }
 
   //////////////                                              //////////////
@@ -334,7 +172,6 @@ export class Game {
     if (status === GameStatus.RUNNING) {
       if (this.gameStatus === GameStatus.IDLE) {
         this.initRunning();
-        this.bindedUpdateMethod = this._updateRunning.bind(this);
       }
     }
     if (status === GameStatus.IDLE) {
@@ -375,7 +212,26 @@ export class Game {
     this._cursorPosition = p;
   }
 
-  // subscribe
+  public isCursorInsideHero(): HeroSide | null {
+    if (
+      intersectCircleWithPoint(
+        this.leftHero.center,
+        this.leftHero.radius,
+        this._cursorPosition
+      )
+    )
+      return this.gameStatus === GameStatus.IDLE ? "right" : "left";
+    if (
+      intersectCircleWithPoint(
+        this.rightHero.center,
+        this.rightHero.radius,
+        this._cursorPosition
+      )
+    )
+      return "right";
+    return null;
+  }
+
   public subscribe(type: EventType, callback: EventCallback) {
     this.eventObserver.subscribe(type, callback);
   }
